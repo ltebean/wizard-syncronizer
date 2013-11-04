@@ -60,6 +60,10 @@ if (action == "login") {
 
 	function commitFromDir(baseDir) {
 		var user = conf.user;
+		if(!user){
+			console.log("you must first login");
+			return;
+		}
 		var api = apiPool[env];
 		var repo = new Repo(baseDir);
 		repo.loadWidget("relatedDeal", function(widget) {
