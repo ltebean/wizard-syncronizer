@@ -18,6 +18,18 @@ program
   });
 
 program
+  .command('config')
+  .description('change config')
+  .option("-g, --git [git]", "git repo")
+  .option("-d, --baseDir [baseDir]", "the baseDir to search from")
+  .action(function(options){
+    require("./wizard-config.js").configure({
+    	git:options.git,
+    	baseDir:options.baseDir
+    });
+  });
+
+program
   .command('commit')
   .description('commit a module from local directory')
   .option("-n, --name [name]", "name of the module to commit")
