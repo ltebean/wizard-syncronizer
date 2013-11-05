@@ -11,6 +11,11 @@ function initIfNeeded(){
 	}
 }
 
+exports.getWizardHome=function(){
+	initIfNeeded();
+	return getUserHome()+"/.wizard";
+}
+
 exports.saveConfig=function(config) {
 	initIfNeeded();
 	var path = getUserHome()+"/.wizard/config.json"

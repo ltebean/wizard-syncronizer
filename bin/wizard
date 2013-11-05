@@ -19,7 +19,7 @@ program
 
 program
   .command('commit')
-  .description('commit a module')
+  .description('commit a module from local directory')
   .option("-n, --name [name]", "name of the module to commit")
   .option("-m, --comment [comment]", "your comment")
   .option("-e, --env [env]", "which environment to commit {alpha|beta|product}")
@@ -28,6 +28,22 @@ program
     	widgetName:options.name,
     	comment:options.comment,
     	env:options.env
+    });
+  });
+
+program
+  .command('sync')
+  .description('sync a module from remote git repo')
+  .option("-n, --name [name]", "name of the module to commit")
+  .option("-m, --comment [comment]", "your comment")
+  .option("-b, --branch [branch]", "git repo branch")
+  .option("-e, --env [env]", "which environment to commit {alpha|beta|product}")
+  .action(function(options){
+    require("./wizard-sync.js").sync({
+    	widgetName:options.name,
+    	comment:options.comment,
+    	env:options.env,
+    	branch:options.branch
     });
   });
 
