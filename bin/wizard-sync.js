@@ -55,7 +55,10 @@ exports.sync = function(options) {
 	cp.exec(command, {}, function(err, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);
-		commitFromDir(tempDirectory + "/" + conf.baseDir || "src/main/resources/widget");
+		if(conf.baseDir){
+			tempDirectory=tempDirectory+"/"+conf.baseDir
+		}
+		commitFromDir(tempDirectory);
 
 		function commitFromDir(baseDir) {
 
