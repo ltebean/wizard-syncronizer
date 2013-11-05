@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+program.version('0.0.1')
+
+program
+  .command('login')
+  .description('login with username and password')
+  .option("-l, --username [username]", "username")
+  .option("-p, --password [password]", "password")
+  .option("-e, --env [env]", "environment {alpha|beta|product}, default to alpha")
+  .action(function(options){
+    require("./wizard-login.js").login({
+    	username:options.username,
+    	password:options.password,
+    	env:options.env||"alpha"
+    });
+  });
+
+program
+  .command('commit')
+  .description('commit a module')
+  .option("-n, --name [name]", "name of the module to commit")
+  .option("-m, --comment [comment]", "your comment")
+  .option("-e, --env [env]", "which environment to commit {alpha|beta|product}")
+  .action(function(options){
+    require("./wizard-commit.js").commit({
+    	widgetName:options.name,
+    	comment:options.comment,
+    	env:options.env
+    });
+  });
+
+program.parse(process.argv);
+if (program.args.length === 0) program.help() 
