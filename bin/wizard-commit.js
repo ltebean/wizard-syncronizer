@@ -39,9 +39,10 @@ exports.commit = function(options) {
 		return;
 	}
 
-	var baseDir = conf.baseDir || "/Users/ltebean/Desktop/java workspace/shop-web/src/main/resources";
-
-	commitFromDir(baseDir);
+	var cp = require('child_process');
+	cp.exec("pwd", {}, function(err, stdout, stderr) {
+		commitFromDir(stdout.trim());
+	});
 
 	function commitFromDir(baseDir) {
 
