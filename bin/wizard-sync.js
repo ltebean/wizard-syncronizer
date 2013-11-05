@@ -44,7 +44,7 @@ exports.sync = function(options) {
 		console.log("you must specify a branch");
 		return;
 	}
-
+	deleteTempDirectory(); 
 	var tempDirectory = createTempDirectory();
 	var cp = require('child_process');
 	console.log("create temp directory: " + tempDirectory);
