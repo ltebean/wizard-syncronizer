@@ -37,7 +37,7 @@ example:
 	
 example: sync the promo module on branch "feature" to alpha server 
 	
-	wizard sync -n promo -m comment -b feature -e env alpha
+	wizard sync -n promo -m comment -b feature -e alpha
 
 ###Commit a module from local directory to server
 
@@ -50,4 +50,4 @@ example: sync the promo module on branch "feature" to alpha server
 	
 example: commit the promo module to alpha server 
 	
-	wizard commit -n promo -m comment -e env alpha
+	wizard commit -n promo -m comment -e alpha
