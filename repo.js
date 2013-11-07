@@ -53,7 +53,7 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 				console.log("found: " + file);
 				var config = yaml.load(fs.readFileSync(file).toString())
 				widget.parentWidgetName = config.parentWidgetName || "";
-				widget.layout = config.layout || "";
+				widget.layoutName = config.layoutName || "";
 				widget.layoutRule = config.layoutRule || "";
 			}
 		}

@@ -34,7 +34,6 @@ API.prototype.commit = function(user, widget, comment, cb) {
 	var jar = request.jar()
 	jar.add(cookie)
 	var content = {
-		author: user.name,
 		widget: widget,
 		comment: comment
 	}
