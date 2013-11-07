@@ -1,3 +1,9 @@
+##Installation
+
+Node.js runtime environment is required.
+Clone the repo and execute the following command:
+	
+	sudo npm link 
 ## Usage
 
 ###Setup your account
