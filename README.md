@@ -45,6 +45,7 @@ example: sync the promo module on branch "feature" to alpha server
 	
 	wizard sync -n promo -m comment -b feature -e alpha
 
+
 ### Commit a module from local directory to server
 
 	wizard commit --help
