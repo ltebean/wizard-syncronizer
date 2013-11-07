@@ -54,4 +54,30 @@ API.prototype.commit = function(user, widget, comment, cb) {
 	});
 }
 
-exports = module.exports = API;
+API.prototype.preview = function(user,shopId, widget, cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + user.id);
+	var jar = request.jar()
+	jar.add(cookie)
+	request({
+		url: "http://" + domain + "/admin/wizardPreviewAction.action",
+		headers: {
+			"Content-type": "application/x-www-form-urlencoded"
+		},
+		jar:jar,
+		method: "POST",
+		body: "shopId="+shopId+"&widgetString="+encodeURIComponent(JSON.stringify(widget))
+	}, function(error, response, body) {
+		cb(body);
+	});
+}
+
+var apiPool = {
+	alpha: new API("alpha.wizard.dp"),
+	beta: new API("beta.wizard.dp"),
+	product: new API("wizard.dp")
+}
+
+exports.getAPI=function(env){
+	return apiPool[env];
+}

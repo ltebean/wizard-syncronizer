@@ -57,3 +57,17 @@ example: sync the promo module on branch "feature" to alpha server
 example: commit the promo module to alpha server 
 	
 	wizard commit -n promo -m comment -e alpha
+
+### Preview a module
+
+	wizard preview --help
+	
+	Options:
+    -n, --name [name]      name of the module to preview
+    -s, --shopId [shopId]  shopId
+    -e, --env [env]        which environment {alpha|beta|product}
+
+	
+example: preview promo module in alpha environment
+	
+	wizard preview -n promo -s 500447 -e alpha

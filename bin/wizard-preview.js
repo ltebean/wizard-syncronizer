@@ -9,7 +9,7 @@ var conf = config.loadConfig();
 exports.commit = function(options) {
 	var widgetName = options.widgetName;
 	var env = options.env;
-	var comment = options.comment;
+	var shopId = options.shopId;
 	if (!conf) {
 		console.log("you must first login");
 		return;
@@ -27,33 +27,20 @@ exports.commit = function(options) {
 		console.log("you must specify the env {alpha|beta|product}");
 		return;
 	}
-	if (!comment) {
-		console.log("you must enter the comment");
-		return;
-	}
-
 	var cp = require('child_process');
+	var api = API.getAPI(env);
 	cp.exec("pwd", {}, function(err, stdout, stderr) {
-		commitFromDir(stdout.trim());
+		var repo=new Repo(stdout.trim());
+		repo.loadWidget(widgetName,function(widget){
+			api.preview(user,shopId,widget,function(html){
+				if(html){
+					console.log(html);
+				}else{
+					console.log("fail");
+				}
+			})
+		})
 	});
 
-	function commitFromDir(baseDir) {
-
-		var api = API.getAPI(env);
-		var repo = new Repo(baseDir);
-		repo.loadWidget(widgetName, function(widget) {
-			if (!widget) {
-				console.log("widget not found: " + widgetName);
-				return;
-			}
-			console.log("updoading widget: " + widgetName + "...");
-			api.commit(user, widget, comment, function(code) {
-				if (code == 200) {
-					console.log("updoad success");
-				} else {
-					console.log("updoad failed");
-				}
-			});
-		})
-	}
+	
 }

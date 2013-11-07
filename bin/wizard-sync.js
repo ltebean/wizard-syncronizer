@@ -7,13 +7,6 @@ var fs = require("fs");
 
 var conf = config.loadConfig();
 
-var apiPool = {
-	alpha: new API("alpha.wizard.dp"),
-	beta: new API("wizard.dp"),
-	product: new API("wizard.dp")
-}
-
-
 exports.sync = function(options) {
 	var widgetName = options.widgetName;
 	var env = options.env;
@@ -62,7 +55,7 @@ exports.sync = function(options) {
 
 		function commitFromDir(baseDir) {
 
-			var api = apiPool[env];
+			var api = API.getAPI(env);
 			var repo = new Repo(baseDir);
 			repo.loadWidget(widgetName, function(widget) {
 				if (!widget) {

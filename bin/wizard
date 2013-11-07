@@ -59,5 +59,19 @@ program
     });
   });
 
+program
+  .command('preview')
+  .description('preview a module')
+  .option("-n, --name [name]", "name of the module to preview")
+  .option("-s, --shopId [shopId]", "shopId")
+  .option("-e, --env [env]", "which environment {alpha|beta|product}")
+  .action(function(options){
+    require("./wizard-preview.js").commit({
+      widgetName:options.name,
+      shopId:options.shopId,
+      env:options.env
+    });
+  });
+
 program.parse(process.argv);
 if (program.args.length === 0) program.help() 

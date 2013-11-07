@@ -5,13 +5,6 @@ var config = require("../config.js");
 var conf = config.loadConfig();
 
 
-var apiPool = {
-	alpha: new API("alpha.wizard.dp"),
-	beta: new API("beta.wizard.dp"),
-	product: new API("wizard.dp")
-}
-
-
 exports.login = function(options) {
 	var env = options.env;
 	var name = options.username;
@@ -24,7 +17,7 @@ exports.login = function(options) {
 		console.log("name or password cannot be null");
 		return;
 	}
-	var api = apiPool[env];
+	var api = API.getAPI(env);
 	console.log("login...")
 	api.login(name, password, function(user) {
 		if (user) {
