@@ -1,4 +1,4 @@
-##Installation
+## Installation
 
 Node.js runtime environment is required.
 Clone the repo and execute the following command:
@@ -6,7 +6,7 @@ Clone the repo and execute the following command:
 	sudo npm link 
 ## Usage
 
-###Setup your account
+### Setup your account
 
 	wizard login --help
 	
@@ -19,7 +19,7 @@ example:
 	
 	wizard login -l name -p password -e alpha
 	
-###Add Configuration
+### Add Configuration
 
 	wizard config --help
 	
@@ -31,7 +31,7 @@ example:
 	
 	wizard config -g http://code.dianpingoa.com/apple/shop-web
 	
-###Sync a module from remote repo to server
+### Sync a module from remote repo to server
 
 	wizard sync --help
 	
@@ -45,7 +45,7 @@ example: sync the promo module on branch "feature" to alpha server
 	
 	wizard sync -n promo -m comment -b feature -e alpha
 
-###Commit a module from local directory to server
+### Commit a module from local directory to server
 
 	wizard commit --help
 	
