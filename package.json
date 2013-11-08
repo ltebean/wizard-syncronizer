@@ -4,6 +4,7 @@
   "scripts": {
     "start": "node server.js"
   },
+  "main": "./index.js",
   "bin": {
     "wizard": "./bin/wizard"
   },
