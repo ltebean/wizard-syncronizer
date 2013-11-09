@@ -40,16 +40,16 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 	this.walker.on('end', function() {
 		for (var i = 0; i < files.length; i++) {
 			var file = files[i];
-			if (file.indexOf(widgetName + ".groovy") != -1) {
+			if (file.indexOf('/' + widgetName + ".groovy") != -1) {
 				console.log("found: " + file);
 				widget.modes.display.code = fs.readFileSync(file).toString();
-			} else if (file.indexOf(widgetName + ".ftl") != -1) {
+			} else if (file.indexOf('/' + widgetName + ".ftl") != -1) {
 				console.log("found: " + file);
 				widget.modes.display.template = fs.readFileSync(file).toString();
-			} else if (file.indexOf(widgetName + ".js") != -1) {
+			} else if (file.indexOf('/' + widgetName + ".js") != -1) {
 				console.log("found: " + file);
 				widget.modes.display.script = fs.readFileSync(file).toString();
-			} else if (file.indexOf(widgetName + ".widget") != -1) {
+			} else if (file.indexOf('/' + widgetName + ".widget") != -1) {
 				console.log("found: " + file);
 				var config = yaml.load(fs.readFileSync(file).toString())
 				widget.parentWidgetName = config.parentWidgetName || "";
