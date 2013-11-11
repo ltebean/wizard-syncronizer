@@ -12,6 +12,7 @@ exports.sync = function(options) {
 	var env = options.env;
 	var comment = options.comment;
 	var branch = options.branch;
+
 	if (!conf) {
 		console.log("you must first login");
 		return;
@@ -51,12 +52,31 @@ exports.sync = function(options) {
 		if(conf.baseDir){
 			tempDirectory=tempDirectory+"/"+conf.baseDir
 		}
-		commitFromDir(tempDirectory);
+		var repo = new Repo(tempDirectory);
 
-		function commitFromDir(baseDir) {
+
+		if(widgetName=="all"){
+			commitAll();
+		}else{			
+			commitWidget(widgetName,function done(){
+				deleteTempDirectory();
+				console.log("delete temp directory success");
+			});
+		}
+		
+		function commitAll(){
+			repo.findAllWidget(function(widgetList){
+				widgetList.forEach(function(widgetName,index){
+					commitWidget(widgetName,function(){
+
+					});
+				});
+			})
+
+		}
+		function commitWidget(widgetName,cb) {
 
 			var api = API.getAPI(env);
-			var repo = new Repo(baseDir);
 			repo.loadWidget(widgetName, function(widget) {
 				if (!widget) {
 					console.log("widget not found: " + widgetName);
@@ -65,12 +85,11 @@ exports.sync = function(options) {
 				console.log("updoading widget: " + widgetName + "...");
 				api.commit(user, widget, comment, function(code) {
 					if (code == 200) {
-						console.log("updoad success");
+						console.log("updoad "+widgetName+" success");
 					} else {
-						console.log("updoad failed");
+						console.log("updoad " +widgetName+" failed");
 					}
-					console.log("delete temp directory success");
-					deleteTempDirectory();
+					cb("done");
 				});
 
 			})

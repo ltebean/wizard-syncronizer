@@ -3,11 +3,7 @@ var fs = require('fs');
 var yaml = require('js-yaml');
 
 function Repo(baseDir) {
-	this.baseDir = baseDir;
-	this.walker = walk.walk(baseDir, {
-		followLinks: false,
-		filters: ["target", "WEB-INF"]
-	});
+	this.baseDir = baseDir;	
 }
 
 Repo.prototype.loadWidget = function(widgetName, cb) {
@@ -27,7 +23,11 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 	}
 	var files = [];
 	console.log("searching from path: " + this.baseDir);
-	this.walker.on('file', function(root, fileStats, next) {
+	var walker = walk.walk(this.baseDir, {
+		followLinks: false,
+		filters: ["target", "WEB-INF"]
+	});
+	walker.on('file', function(root, fileStats, next) {
 		// Add this file to the list of files
 		//console.log(root);
 		if (fileStats.name.indexOf(widgetName) != -1) {
@@ -37,7 +37,7 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 
 	});
 
-	this.walker.on('end', function() {
+	walker.on('end', function() {
 		for (var i = 0; i < files.length; i++) {
 			var file = files[i];
 			if (file.indexOf('/' + widgetName + ".groovy") != -1) {
@@ -64,5 +64,24 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 		}
 	});
 };
+
+Repo.prototype.findAllWidget=function(cb){
+	var widgetList=[];
+	var walker = walk.walk(this.baseDir, {
+		followLinks: false,
+		filters: ["target", "WEB-INF"]
+	});
+	walker.on('file', function(root, fileStats, next) {
+		// Add this file to the list of files
+		if (fileStats.name.indexOf(".groovy") != -1) {
+			widgetList.push(new RegExp("(\\w+)\.groovy").exec(fileStats.name)[1]);
+		}
+		next();
+	});
+	walker.on('end', function() {
+		cb(widgetList);
+	});
+	
+}
 
 exports = module.exports = Repo;
