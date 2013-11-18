@@ -54,6 +54,50 @@ API.prototype.commit = function(user, widget, comment, cb) {
 	});
 }
 
+API.prototype.loadAllWidget = function(user,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + user.id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/widget",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "GET"
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			cb(JSON.parse(body))
+		} else {
+			cb(403);
+		}
+	});
+}
+
+API.prototype.loadAllLayout = function(user,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + user.id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/layout",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "GET"
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			cb(JSON.parse(body));
+		} else {
+			cb(403);
+		}
+	});
+}
+
 API.prototype.preview = function(user,shopId, widget, cb) {
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + user.id);

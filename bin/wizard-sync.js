@@ -4,6 +4,7 @@ var Repo = require("../repo.js");
 var API = require("../api.js");
 var config = require("../config.js");
 var fs = require("fs");
+var package=require("../package.js")
 
 var conf = config.loadConfig();
 
@@ -49,19 +50,21 @@ exports.sync = function(options) {
 	cp.exec(command, {}, function(err, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);
+		var projectDir=tempDirectory;
 		if(conf.baseDir){
 			tempDirectory=tempDirectory+"/"+conf.baseDir
 		}
 		var repo = new Repo(tempDirectory);
-
-
 		if(widgetName=="all"){
 			commitAll();
-		}else{			
-			commitWidget(widgetName,function done(){
-				deleteTempDirectory();
-				console.log("delete temp directory success");
-			});
+		}else{	
+			package.pack(projectDir,function(){
+
+			})
+			// commitWidget(widgetName,function done(){
+			// 	deleteTempDirectory();
+			// 	console.log("delete temp directory success");
+			// });
 		}
 		
 		function commitAll(){
