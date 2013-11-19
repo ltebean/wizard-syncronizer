@@ -8,7 +8,7 @@ program
   .description('login with username and password')
   .option("-l, --username [username]", "username")
   .option("-p, --password [password]", "password")
-  .option("-e, --env [env]", "environment {alpha|beta|product}, default to alpha")
+  .option("-e, --env [env]", "environment {alpha|beta|pre|product}, default to alpha")
   .action(function(options){
     require("./wizard-login.js").login({
     	username:options.username,
@@ -34,7 +34,7 @@ program
   .description('commit a module from local directory')
   .option("-n, --name [name]", "name of the module to commit")
   .option("-m, --comment [comment]", "your comment")
-  .option("-e, --env [env]", "which environment to commit {alpha|beta|product}")
+  .option("-e, --env [env]", "which environment to commit {alpha|beta|pre|product}")
   .action(function(options){
     require("./wizard-commit.js").commit({
     	widgetName:options.name,
@@ -49,7 +49,7 @@ program
   .option("-n, --name [name]", "name of the module to commit")
   .option("-m, --comment [comment]", "your comment")
   .option("-b, --branch [branch]", "git repo branch")
-  .option("-e, --env [env]", "which environment to commit {alpha|beta|product}")
+  .option("-e, --env [env]", "which environment to commit {alpha|beta|pre|product}")
   .action(function(options){
     require("./wizard-sync.js").sync({
     	widgetName:options.name,
@@ -64,7 +64,7 @@ program
   .description('preview a module')
   .option("-n, --name [name]", "name of the module to preview")
   .option("-s, --shopId [shopId]", "shopId")
-  .option("-e, --env [env]", "which environment {alpha|beta|product}")
+  .option("-e, --env [env]", "which environment {alpha|beta|pre|product}")
   .action(function(options){
     require("./wizard-preview.js").commit({
       widgetName:options.name,

@@ -24,7 +24,7 @@ exports.commit = function(options) {
 		return;
 	}
 	if (!env) {
-		console.log("you must specify the env {alpha|beta|product}");
+		console.log("you must specify the env {alpha|beta|pre|product}");
 		return;
 	}
 	if (!comment) {

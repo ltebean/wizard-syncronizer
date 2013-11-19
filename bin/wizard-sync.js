@@ -58,13 +58,13 @@ exports.sync = function(options) {
 		if(widgetName=="all"){
 			commitAll();
 		}else{	
-			package.pack(projectDir,function(){
+			// package.pack(projectDir,function(){
 
-			})
-			// commitWidget(widgetName,function done(){
-			// 	deleteTempDirectory();
-			// 	console.log("delete temp directory success");
-			// });
+			// })
+			commitWidget(widgetName,function done(){
+				deleteTempDirectory();
+				console.log("delete temp directory success");
+			});
 		}
 		
 		function commitAll(){
