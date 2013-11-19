@@ -3,6 +3,8 @@ var api = require("./api.js").getAPI("alpha");
 var Step = require('step');
 var config = require("./config.js");
 var yaml = require('js-yaml');
+var Client = require('ftp');
+var moment = require('moment');
 
 exports.pack = function(projectDir, cb) {
 	var user = config.loadConfig().user;
@@ -19,7 +21,7 @@ exports.pack = function(projectDir, cb) {
 			for (var i = allWidget.length - 1; i >= 0; i--) {
 				var widget = allWidget[i];
 				console.log("writing: " + widget.name + "...");
-				writeWidget(basePackage,widget);
+				writeWidget(basePackage, widget);
 			};
 			return "success";
 		},
@@ -43,36 +45,62 @@ exports.pack = function(projectDir, cb) {
 			console.log(command);
 			cp.exec(command, {}, this);
 
-
 		},
 		function buildFinished(err, stdout, stderr) {
 			console.log(stdout);
 			console.log(stderr);
-			return "";
+			if (!err) {
+				return "success";
+			} else {
+				return "fail"
+			}
 		},
-		function pushToFTP(err, war) {
-			console.log("prepare to push to FTP");
+		function pushToFTP(status) {
+			console.log("prepare to push to FTP...");
+			var client = new Client();
+			client.on('ready', function() {
+				console.log("connected");
+				var localPath = projectDir + "/target/shop-web-product-2.1.9.war";
+				var remotePath = "/product-shop-web/" + moment().format('YYYY-MM-DD_hh-mm-ss');
+				console.log("transfer:" + localPath + " to:" + remotePath);
+				client.mkdir(remotePath, true, function(err) {
+					if(err)throw err;
+					client.put(localPath, remotePath+"/shop-web-product-2.1.9.war", function(err) {
+						if (err) throw err;
+						client.end();
+						console.log("transfer success");
+						console.log("connection ended");
+						cb();
+					});
+				});
+
+			});
+			client.connect({
+				host: "10.1.1.81",
+				user: "qaupload",
+				password: "uploadwar"
+			});
 		});
 
 }
 
-function writeWidget(path,widget){
-	if(widget.modes.display.code){
-		fs.writeFileSync(path+"/"+widget.name+".groovy", widget.modes.display.code);
+function writeWidget(path, widget) {
+	if (widget.modes.display.code) {
+		fs.writeFileSync(path + "/" + widget.name + ".groovy", widget.modes.display.code);
 	}
-	if(widget.modes.display.script){
-		fs.writeFileSync(path+"/"+widget.name+".js", widget.modes.display.script);
+	if (widget.modes.display.script) {
+		fs.writeFileSync(path + "/" + widget.name + ".js", widget.modes.display.script);
 	}
-	if(widget.modes.display.template){
-		fs.writeFileSync(path+"/"+widget.name+".ftl", widget.modes.display.template);
+	if (widget.modes.display.template) {
+		fs.writeFileSync(path + "/" + widget.name + ".ftl", widget.modes.display.template);
 	}
-	if(widget.layoutName||widget.layoutRule){
-		var content=yaml.dump({
-			layoutName:widget.layoutName||"",
-			layoutRule:widget.layoutRule||"",
-			parentWidgetName:widget.parentWidgetName||""
+	if (widget.layoutName || widget.layoutRule) {
+		var content = yaml.dump({
+			layoutName: widget.layoutName || "",
+			layoutRule: widget.layoutRule || "",
+			parentWidgetName: widget.parentWidgetName || ""
 		});
-		fs.writeFileSync(path+"/"+widget.name+".widget", content);
+		fs.writeFileSync(path + "/" + widget.name + ".widget", content);
 	}
 
 }

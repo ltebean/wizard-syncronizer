@@ -4,7 +4,7 @@ var Repo = require("../repo.js");
 var API = require("../api.js");
 var config = require("../config.js");
 var fs = require("fs");
-var package=require("../package.js")
+var package = require("../package.js")
 
 var conf = config.loadConfig();
 
@@ -39,7 +39,7 @@ exports.sync = function(options) {
 		console.log("you must specify a branch");
 		return;
 	}
-	deleteTempDirectory(); 
+	deleteTempDirectory();
 	var tempDirectory = createTempDirectory();
 	var cp = require('child_process');
 	console.log("create temp directory: " + tempDirectory);
@@ -50,34 +50,39 @@ exports.sync = function(options) {
 	cp.exec(command, {}, function(err, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);
-		var projectDir=tempDirectory;
-		if(conf.baseDir){
-			tempDirectory=tempDirectory+"/"+conf.baseDir
+		var projectDir = tempDirectory;
+		if (conf.baseDir) {
+			tempDirectory = tempDirectory + "/" + conf.baseDir
 		}
 		var repo = new Repo(tempDirectory);
-		if(widgetName=="all"){
+		if (widgetName == "all") {
 			commitAll();
-		}else{	
-			// package.pack(projectDir,function(){
-
-			// })
-			commitWidget(widgetName,function done(){
-				deleteTempDirectory();
-				console.log("delete temp directory success");
+		} else {
+			commitWidget(widgetName, function done() {
+				if (env == "product") {
+					package.pack(projectDir, function() {
+						deleteTempDirectory();
+						console.log("delete temp directory success");
+					})
+				} else {
+					deleteTempDirectory();
+					console.log("delete temp directory success");
+				}
 			});
 		}
-		
-		function commitAll(){
-			repo.findAllWidget(function(widgetList){
-				widgetList.forEach(function(widgetName,index){
-					commitWidget(widgetName,function(){
+
+		function commitAll() {
+			repo.findAllWidget(function(widgetList) {
+				widgetList.forEach(function(widgetName, index) {
+					commitWidget(widgetName, function() {
 
 					});
 				});
 			})
 
 		}
-		function commitWidget(widgetName,cb) {
+
+		function commitWidget(widgetName, cb) {
 
 			var api = API.getAPI(env);
 			repo.loadWidget(widgetName, function(widget) {
@@ -88,9 +93,9 @@ exports.sync = function(options) {
 				console.log("updoading widget: " + widgetName + "...");
 				api.commit(user, widget, comment, function(code) {
 					if (code == 200) {
-						console.log("updoad "+widgetName+" success");
+						console.log("updoad " + widgetName + " success");
 					} else {
-						console.log("updoad " +widgetName+" failed");
+						console.log("updoad " + widgetName + " failed");
 					}
 					cb("done");
 				});
