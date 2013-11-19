@@ -4,6 +4,7 @@ Node.js runtime environment is required.
 Clone the repo and execute the following command:
 	
 	sudo npm link 
+
 ## Usage
 
 ### Setup your account
@@ -13,7 +14,7 @@ Clone the repo and execute the following command:
 	Options:
     -l, --username [username]  username
     -p, --password [password]  password
-    -e, --env [env]            environment {alpha|beta|product}, 	default to alpha
+    -e, --env [env]            environment {alpha|beta|pre|product}, 	default to alpha
 	
 example:
 	
@@ -39,12 +40,11 @@ example:
     -n, --name [name]        name of the module to commit
     -m, --comment [comment]  your comment
     -b, --branch [branch]    git repo branch
-    -e, --env [env]          which environment to commit {alpha|beta|product}
+    -e, --env [env]          which environment to commit {alpha|beta|pre|product}
 	
 example: sync the promo module on branch "feature" to alpha server 
 	
 	wizard sync -n promo -m comment -b feature -e alpha
-
 
 ### Preview a module
 
@@ -53,8 +53,7 @@ example: sync the promo module on branch "feature" to alpha server
 	Options:
     -n, --name [name]      name of the module to preview
     -s, --shopId [shopId]  shopId
-    -e, --env [env]        which environment {alpha|beta|product}
-
+    -e, --env [env]        which environment {alpha|beta|pre|product}
 	
 example: preview promo module in alpha environment
 	
