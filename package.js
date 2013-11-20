@@ -1,5 +1,5 @@
 var fs = require('fs');
-var api = require("./api.js").getAPI("alpha");
+var api = require("./api.js").getAPI("product");
 var Step = require('step');
 var config = require("./config.js");
 var yaml = require('js-yaml');
