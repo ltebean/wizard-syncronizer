@@ -25,19 +25,6 @@ exports.pack = function(projectDir, cb) {
 			};
 			return "success";
 		},
-		function loadAllLayout(result) {
-			console.log("start loading all layout...");
-			api.loadAllLayout(user, this);
-		},
-		function writeLayoutToLocal(allLayout) {
-			for (var i = allLayout.length - 1; i >= 0; i--) {
-				var layout = allLayout[i];
-				var writePath = basePackage + "/" + layout.name + ".layout";
-				console.log("writing: " + writePath + "...");
-				fs.writeFileSync(writePath, JSON.stringify(layout.config));
-			};
-			return "success"
-		},
 		function packageWar(result) {
 			console.log("start mvn package...");
 			var cp = require('child_process');
@@ -112,7 +99,11 @@ var deleteFolderRecursive = function(path) {
 			if (fs.statSync(curPath).isDirectory()) { // recurse
 				deleteFolderRecursive(curPath);
 			} else { // delete file
-				fs.unlinkSync(curPath);
+				if (file.indexOf(".layout") != -1) {
+					//console.log(file);
+				} else {
+					fs.unlinkSync(curPath);
+				}
 			}
 		});
 		fs.rmdirSync(path);
