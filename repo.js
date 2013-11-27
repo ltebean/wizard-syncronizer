@@ -74,7 +74,7 @@ Repo.prototype.findAllWidget=function(cb){
 	walker.on('file', function(root, fileStats, next) {
 		// Add this file to the list of files
 		if (fileStats.name.indexOf(".groovy") != -1) {
-			widgetList.push(new RegExp("(\\w+)\.groovy").exec(fileStats.name)[1]);
+			widgetList.push(new RegExp("([\\w\-]+)\.groovy").exec(fileStats.name)[1]);
 		}
 		next();
 	});

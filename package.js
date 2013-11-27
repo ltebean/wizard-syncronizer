@@ -17,7 +17,6 @@ exports.pack = function(projectDir, cb) {
 		function writeWidgetToLocal(allWidget) {
 			console.log(allWidget.length + " widget loaded");
 			deleteFolderRecursive(projectDir + "/src/main/resources/widget");
-			fs.mkdirSync(projectDir + "/src/main/resources/widget");
 			for (var i = allWidget.length - 1; i >= 0; i--) {
 				var widget = allWidget[i];
 				console.log("writing: " + widget.name + "...");
@@ -106,6 +105,5 @@ var deleteFolderRecursive = function(path) {
 				}
 			}
 		});
-		fs.rmdirSync(path);
 	}
 };
