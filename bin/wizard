@@ -73,5 +73,25 @@ program
     });
   });
 
+program
+  .command('init')
+  .description('init app, create an archetype')
+  .option("-n, --name [name]", "name of the module to init")
+  .action(function(options){
+    require("./wizard-init.js").init({
+      widgetName:options.name
+    });
+  });
+
+program
+  .command('server')
+  .description('serve the local app for remote access')
+  .option("-p, --port [port]", "server port")
+  .action(function(options){
+    require("./wizard-server.js").serve({
+      port:options.port
+    });
+  });
+
 program.parse(process.argv);
 if (program.args.length === 0) program.help() 

@@ -32,10 +32,7 @@ exports.commit = function(options) {
 		return;
 	}
 
-	var cp = require('child_process');
-	cp.exec("pwd", {}, function(err, stdout, stderr) {
-		commitFromDir(stdout.trim());
-	});
+	commitFromDir(process.cwd());
 
 	function commitFromDir(baseDir) {
 
