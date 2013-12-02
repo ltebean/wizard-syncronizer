@@ -43,21 +43,25 @@ exports.sync = function(options) {
 	var tempDirectory = createTempDirectory();
 	var cp = require('child_process');
 	console.log("create temp directory: " + tempDirectory);
+	var api = API.getAPI(env);
 
-	var command = 'git clone ' + conf.git + " -b " + branch + " " + tempDirectory;
-	console.log(command);
+	api.loadWidgetExtInfo(user, widgetName, function(extInfo) {
+		cloneAndSync(extInfo);
+	})
 
-	cp.exec(command, {}, function(err, stdout, stderr) {
-		console.log(stdout);
-		console.log(stderr);
-		var projectDir = tempDirectory;
-		if (conf.baseDir) {
-			tempDirectory = tempDirectory + "/" + conf.baseDir
-		}
-		var repo = new Repo(tempDirectory);
-		if (widgetName == "all") {
-			commitAll();
-		} else {
+	function cloneAndSync(extInfo) {
+		var command = 'git clone ' + extInfo.gitURL + " -b " + branch + " " + tempDirectory;
+		console.log(command);
+
+		cp.exec(command, {}, function(err, stdout, stderr) {
+			console.log(stdout);
+			console.log(stderr);
+			var projectDir = tempDirectory;
+			if (conf.baseDir) {
+				tempDirectory = tempDirectory + "/" + conf.baseDir
+			}
+			var repo = new Repo(tempDirectory);
+
 			commitWidget(widgetName, function done() {
 				if (env == "product") {
 					package.pack(projectDir, function() {
@@ -69,40 +73,29 @@ exports.sync = function(options) {
 					console.log("delete temp directory success");
 				}
 			});
-		}
 
-		function commitAll() {
-			repo.findAllWidget(function(widgetList) {
-				widgetList.forEach(function(widgetName, index) {
-					commitWidget(widgetName, function() {
+			function commitWidget(widgetName, cb) {
 
-					});
-				});
-			})
-
-		}
-
-		function commitWidget(widgetName, cb) {
-
-			var api = API.getAPI(env);
-			repo.loadWidget(widgetName, function(widget) {
-				if (!widget) {
-					console.log("widget not found: " + widgetName);
-					return;
-				}
-				console.log("updoading widget: " + widgetName + "...");
-				api.commit(user, widget, comment, function(code) {
-					if (code == 200) {
-						console.log("updoad " + widgetName + " success");
-					} else {
-						console.log("updoad " + widgetName + " failed");
+				repo.loadWidget(widgetName, function(widget) {
+					if (!widget) {
+						console.log("widget not found: " + widgetName);
+						return;
 					}
-					cb("done");
-				});
+					console.log("updoading widget: " + widgetName + "...");
+					api.commit(user, widget, comment, function(code) {
+						if (code == 200) {
+							console.log("updoad " + widgetName + " success");
+						} else {
+							console.log("updoad " + widgetName + " failed");
+						}
+						cb("done");
+					});
 
-			})
-		}
-	})
+				})
+			}
+		});
+	}
+
 
 
 }

@@ -54,6 +54,29 @@ API.prototype.commit = function(user, widget, comment, cb) {
 	});
 }
 
+API.prototype.loadWidgetExtInfo = function(user,widgetName,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + user.id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/widget/"+widgetName+"/extInfo",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "GET"
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			cb(JSON.parse(body))
+		} else {
+			cb(403);
+		}
+	});
+}
+
+
 API.prototype.loadAllWidget = function(user,cb) {
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + user.id);
