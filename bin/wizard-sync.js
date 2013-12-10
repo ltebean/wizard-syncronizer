@@ -58,7 +58,7 @@ exports.sync = function(options) {
 			console.log(stderr);
 			var projectDir = tempDirectory;
 			if (conf.baseDir) {
-				tempDirectory = tempDirectory + "/" + conf.baseDir
+				//tempDirectory = tempDirectory + "/" + conf.baseDir
 			}
 			var repo = new Repo(tempDirectory);
 

@@ -40,6 +40,12 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 	walker.on('end', function() {
 		for (var i = 0; i < files.length; i++) {
 			var file = files[i];
+			if(file.indexOf('WEB-INF')!=-1){
+				continue;
+			}
+			if(file.indexOf('target')!=-1){
+				continue;
+			}
 			if (file.indexOf('/' + widgetName + ".groovy") != -1) {
 				console.log("found: " + file);
 				widget.modes.display.code = fs.readFileSync(file).toString();
