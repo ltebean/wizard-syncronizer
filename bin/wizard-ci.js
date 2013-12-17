@@ -22,7 +22,7 @@ app.configure(function () {
 	});
 });
 
-app.post('/ci/sync', function(req,res){
+app.post('/admin/ci/sync', function(req,res){
 	syncronizer.sync({
     	widgetName:req.body.widgetName,
     	comment:req.body.comment,
