@@ -28,8 +28,9 @@ app.post('/admin/ci/sync', function(req,res){
     	comment:req.body.comment,
     	env:req.body.env,
     	branch:req.body.branch
+    },function(msg){
+    	res.send({"msg":msg});
     });
-    res.send(200);
 }); 
 
 

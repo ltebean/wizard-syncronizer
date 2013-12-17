@@ -8,7 +8,7 @@ var package = require("../package.js")
 
 var conf = config.loadConfig();
 
-exports.sync = function(options) {
+exports.sync = function(options,cb) {
 	var widgetName = options.widgetName;
 	var env = options.env;
 	var comment = options.comment;
@@ -71,6 +71,7 @@ exports.sync = function(options) {
 				} else {
 					deleteTempDirectory();
 					console.log("delete temp directory success");
+					cb && cb("done");
 				}
 			});
 
