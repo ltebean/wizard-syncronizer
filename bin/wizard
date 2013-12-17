@@ -93,5 +93,15 @@ program
     });
   });
 
+program
+  .command('ci')
+  .description('start a ci server')
+  .option("-p, --port [port]", "server port")
+  .action(function(options){
+    require("./wizard-ci.js").serve({
+      port:options.port
+    });
+  });
+
 program.parse(process.argv);
 if (program.args.length === 0) program.help() 
