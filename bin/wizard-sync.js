@@ -64,10 +64,11 @@ exports.sync = function(options,cb) {
 
 			commitWidget(widgetName, function done() {
 				if (env == "product") {
-					package.pack(projectDir, function() {
-						deleteTempDirectory();
-						console.log("delete temp directory success");
-					})
+					// package.pack(projectDir, function() {
+					// 	deleteTempDirectory();
+					// 	console.log("delete temp directory success");
+					// })
+					cb && cb("done");
 				} else {
 					deleteTempDirectory();
 					console.log("delete temp directory success");
