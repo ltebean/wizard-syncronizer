@@ -17,6 +17,11 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 				code: "",
 				template: "",
 				script: ""
+			},
+			config:{
+				code: "",
+				template: "",
+				script: ""
 			}
 
 		}
@@ -55,7 +60,16 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 			} else if (file.indexOf('/' + widgetName + ".js") != -1) {
 				console.log("found: " + file);
 				widget.modes.display.script = fs.readFileSync(file).toString();
-			} else if (file.indexOf('/' + widgetName + ".widget") != -1) {
+			} else if (file.indexOf('/' + widgetName + "@config.groovy") != -1) {
+				console.log("found: " + file);
+				widget.modes.config.code = fs.readFileSync(file).toString();
+			} else if (file.indexOf('/' + widgetName + "@config.ftl") != -1) {
+				console.log("found: " + file);
+				widget.modes.config.template = fs.readFileSync(file).toString();
+			} else if (file.indexOf('/' + widgetName + "@config.js") != -1) {
+				console.log("found: " + file);
+				widget.modes.config.script = fs.readFileSync(file).toString();
+			}  else if (file.indexOf('/' + widgetName + ".widget") != -1) {
 				console.log("found: " + file);
 				var config = yaml.load(fs.readFileSync(file).toString())
 				widget.parentWidgetName = config.parentWidgetName || "";
