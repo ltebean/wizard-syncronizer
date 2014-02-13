@@ -76,6 +76,29 @@ API.prototype.loadWidgetExtInfo = function(user,widgetName,cb) {
 	});
 }
 
+API.prototype.createWidget = function(user,widgetExtInfo,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + user.id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/widget/extInfo",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+		body: JSON.stringify(widgetExtInfo)
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			cb(200);
+		} else {
+			cb(403);
+		}
+	});
+}
+
 
 API.prototype.loadAllWidget = function(user,cb) {
 	var domain = this.domain;

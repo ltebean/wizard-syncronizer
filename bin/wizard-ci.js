@@ -4,6 +4,10 @@ var util = require("util");
 var Repo = require("../repo.js");
 
 var syncronizer=require("./wizard-sync.js");
+var config = require("../config.js");
+var API = require("../api.js");
+
+var user = config.loadConfig().user;
 
 exports.serve=function(options){
 	var port=options.port||3000;
@@ -31,6 +35,18 @@ app.post('/admin/ci/sync', function(req,res){
     },function(msg){
     	res.send({"msg":msg});
     });
+}); 
+
+app.post('/admin/ci/sync/widgetExtInfo', function(req,res){
+	var envs=['alpha','beta','product'];
+	envs.forEach(function(env){
+		var api = API.getAPI(env);
+		api.createWidget(user,req.body,function(code){
+			if(code==200){
+				res.send(env+" sync success");
+			}
+		})
+	})	
 }); 
 
 
