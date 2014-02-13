@@ -38,18 +38,14 @@ app.post('/admin/ci/sync', function(req,res){
 }); 
 
 app.post('/admin/ci/sync/widgetExtInfo', function(req,res){
-	var envs=['alpha','beta'];
+	var envs=['alpha','beta','product'];
 	envs.forEach(function(env){
 		var api = API.getAPI(env);
-		console.log(env);
-		console.log(req.body);
-		console.log("-----------------------")
-
-		// api.createWidget(user,req.body,function(code){
-		// 	if(code==200){
-		// 		res.send(env+" sync success");
-		// 	}
-		// })
+		api.createWidget(user,req.body,function(code){
+			if(code==200){
+				res.send("sync success");
+			}
+		})
 	})	
 }); 
 
