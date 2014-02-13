@@ -41,11 +41,15 @@ app.post('/admin/ci/sync/widgetExtInfo', function(req,res){
 	var envs=['alpha','beta'];
 	envs.forEach(function(env){
 		var api = API.getAPI(env);
-		api.createWidget(user,req.body,function(code){
-			if(code==200){
-				res.send(env+" sync success");
-			}
-		})
+		console.log(env);
+		console.log(req.body);
+		console.log("-----------------------")
+
+		// api.createWidget(user,req.body,function(code){
+		// 	if(code==200){
+		// 		res.send(env+" sync success");
+		// 	}
+		// })
 	})	
 }); 
 
