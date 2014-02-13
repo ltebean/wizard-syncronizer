@@ -38,7 +38,7 @@ app.post('/admin/ci/sync', function(req,res){
 }); 
 
 app.post('/admin/ci/sync/widgetExtInfo', function(req,res){
-	var envs=['alpha','beta','product'];
+	var envs=['alpha','beta'];
 	envs.forEach(function(env){
 		var api = API.getAPI(env);
 		api.createWidget(user,req.body,function(code){
