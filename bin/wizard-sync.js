@@ -53,7 +53,7 @@ exports.sync = function(options,cb) {
 
 	function cloneAndSync(extInfo) {
 		var command = 'git clone ' + extInfo.gitURL + " -b " + branch + " " + tempDirectory;
-		logAndAppend(msg,info)
+		logAndAppend(command,info)
 
 		cp.exec(command, {}, function(err, stdout, stderr) {
 			console.log(stdout);
