@@ -63,7 +63,7 @@ exports.sync = function(options,cb) {
 			}
 			var repo = new Repo(tempDirectory);
 
-			commitWidget(widgetName, options,function done() {
+			commitWidget(widgetName,function done() {
 				if (env == "product") {
 					// package.pack(projectDir, function() {
 					// 	deleteTempDirectory();
@@ -77,7 +77,7 @@ exports.sync = function(options,cb) {
 				}
 			});
 
-			function commitWidget(widgetName,options, cb) {
+			function commitWidget(widgetName,cb) {
 
 				repo.loadWidget(widgetName, function(widget) {
 					if (!widget) {
@@ -85,7 +85,7 @@ exports.sync = function(options,cb) {
 						return;
 					}
 					console.log("updoading widget: " + widgetName + "...");
-					api.commit(user, options , function(code) {
+					api.commit(user, widget,comment, options.clearCache , function(code) {
 						if (code == 200) {
 							console.log("updoad " + widgetName + " success");
 						} else {

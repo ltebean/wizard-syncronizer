@@ -28,11 +28,16 @@ API.prototype.login = function(name, password, cb) {
 	)
 };
 
-API.prototype.commit = function(user, body, cb) {
+API.prototype.commit = function(user, widget, comment,clearCache, cb) {
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + user.id);
 	var jar = request.jar()
-	jar.add(cookie);
+	jar.add(cookie)
+	var content = {
+		widget: widget,
+		comment: comment,
+		clearCache:clearCache
+	}
 	request({
 		url: "http://" + domain + "/admin/api/widget/commit",
 		headers: {
@@ -40,7 +45,7 @@ API.prototype.commit = function(user, body, cb) {
 		},
 		jar:jar,
 		method: "POST",
-		body: JSON.stringify(body)
+		body: JSON.stringify(content)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			cb(200)
@@ -49,6 +54,7 @@ API.prototype.commit = function(user, body, cb) {
 		}
 	});
 }
+
 
 API.prototype.loadWidgetExtInfo = function(user,widgetName,cb) {
 	var domain = this.domain;
