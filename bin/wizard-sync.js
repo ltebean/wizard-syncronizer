@@ -14,6 +14,7 @@ exports.sync = function(options,cb) {
 	var comment = options.comment;
 	var branch = options.branch;
 
+	var info="";
 
 	if (!conf) {
 		console.log("you must first login");
@@ -53,6 +54,7 @@ exports.sync = function(options,cb) {
 	function cloneAndSync(extInfo) {
 		var command = 'git clone ' + extInfo.gitURL + " -b " + branch + " " + tempDirectory;
 		console.log(command);
+		info+=command;
 
 		cp.exec(command, {}, function(err, stdout, stderr) {
 			console.log(stdout);
@@ -69,11 +71,11 @@ exports.sync = function(options,cb) {
 					// 	deleteTempDirectory();
 					// 	console.log("delete temp directory success");
 					// })
-					cb && cb("done");
+					cb && cb(info);
 				} else {
 					deleteTempDirectory();
 					console.log("delete temp directory success");
-					cb && cb("done");
+					cb && cb(info);
 				}
 			});
 
@@ -81,15 +83,21 @@ exports.sync = function(options,cb) {
 
 				repo.loadWidget(widgetName, function(widget) {
 					if (!widget) {
-						console.log("widget not found: " + widgetName);
+						var msg="widget not found: " + widgetName;
+						console.log(msg);
+						info+=msg;
 						return;
 					}
 					console.log("updoading widget: " + widgetName + "...");
 					api.commit(user, widget,comment, options.clearCache , function(code) {
 						if (code == 200) {
-							console.log("updoad " + widgetName + " success");
+							var msg="updoad " + widgetName + " success";
+							console.log(msg);
+							info+=msg;
 						} else {
-							console.log("updoad " + widgetName + " failed");
+							var msg="updoad " + widgetName + " failed";
+							console.log(msg);
+							info+=msg;
 						}
 						cb("done");
 					});
