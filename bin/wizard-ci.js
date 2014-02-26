@@ -34,7 +34,7 @@ app.post('/admin/ci/sync', function(req,res){
     	branch:req.body.branch,
     	clearCache:req.body.clearCache
     },function(msg){
-    	res.send({"msg":"sync success"});
+    	res.send({"msg":msg});
     });
 }); 
 
