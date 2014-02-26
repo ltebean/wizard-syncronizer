@@ -86,7 +86,6 @@ exports.sync = function(options,cb) {
 						return cb();
 					}
 					logAndAppend("updoading widget: " + widgetName + "...",info);
-					info+=msg＋"\n";
 					api.commit(user, widget,comment, options.clearCache , function(code) {
 						if (code == 200) {
 							logAndAppend("updoad " + widgetName + " success",info)
