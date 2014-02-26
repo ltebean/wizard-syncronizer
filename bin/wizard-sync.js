@@ -53,8 +53,7 @@ exports.sync = function(options,cb) {
 
 	function cloneAndSync(extInfo) {
 		var command = 'git clone ' + extInfo.gitURL + " -b " + branch + " " + tempDirectory;
-		console.log(command);
-		info+=command;
+		logAndAppend(msg,info)
 
 		cp.exec(command, {}, function(err, stdout, stderr) {
 			console.log(stdout);
@@ -83,21 +82,16 @@ exports.sync = function(options,cb) {
 
 				repo.loadWidget(widgetName, function(widget) {
 					if (!widget) {
-						var msg="widget not found: " + widgetName;
-						console.log(msg);
-						info+=msg;
-						return;
+						logAndAppend("widget not found: " + widgetName,info)
+						return cb();
 					}
-					console.log("updoading widget: " + widgetName + "...");
+					logAndAppend("updoading widget: " + widgetName + "...",info);
+					info+=msg＋"\n";
 					api.commit(user, widget,comment, options.clearCache , function(code) {
 						if (code == 200) {
-							var msg="updoad " + widgetName + " success";
-							console.log(msg);
-							info+=msg;
+							logAndAppend("updoad " + widgetName + " success",info)
 						} else {
-							var msg="updoad " + widgetName + " failed";
-							console.log(msg);
-							info+=msg;
+							logAndAppend("updoad " + widgetName + " failed",info)
 						}
 						cb("done");
 					});
@@ -107,8 +101,11 @@ exports.sync = function(options,cb) {
 		});
 	}
 
+}
 
-
+function logAndAppend(msg,info){
+	console.log(msg);
+	info+=msg＋"\n";
 }
 
 function createTempDirectory() {
