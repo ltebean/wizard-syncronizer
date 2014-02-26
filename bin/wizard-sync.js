@@ -105,7 +105,7 @@ exports.sync = function(options,cb) {
 
 function logAndAppend(msg,info){
 	console.log(msg);
-	info+=msg＋"\n";
+	info= info + msg + '\n';
 }
 
 function createTempDirectory() {
