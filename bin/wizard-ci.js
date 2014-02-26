@@ -28,7 +28,11 @@ app.configure(function () {
 
 app.post('/admin/ci/sync', function(req,res){
 	syncronizer.sync({
-    	req.body
+    	widgetName:req.body.widgetName,
+    	comment:req.body.comment,
+    	env:req.body.env,
+    	branch:req.body.branch,
+    	clearCache:req.body.clearCache
     },function(msg){
     	res.send({"msg":msg});
     });

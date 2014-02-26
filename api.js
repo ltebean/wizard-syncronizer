@@ -28,15 +28,11 @@ API.prototype.login = function(name, password, cb) {
 	)
 };
 
-API.prototype.commit = function(user, widget, comment, cb) {
+API.prototype.commit = function(user, body, cb) {
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + user.id);
 	var jar = request.jar()
-	jar.add(cookie)
-	var content = {
-		widget: widget,
-		comment: comment
-	}
+	jar.add(cookie);
 	request({
 		url: "http://" + domain + "/admin/api/widget/commit",
 		headers: {
@@ -44,7 +40,7 @@ API.prototype.commit = function(user, widget, comment, cb) {
 		},
 		jar:jar,
 		method: "POST",
-		body: JSON.stringify(content)
+		body: JSON.stringify(body)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			cb(200)

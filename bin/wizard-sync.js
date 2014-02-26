@@ -14,6 +14,7 @@ exports.sync = function(options,cb) {
 	var comment = options.comment;
 	var branch = options.branch;
 
+
 	if (!conf) {
 		console.log("you must first login");
 		return;
@@ -62,7 +63,7 @@ exports.sync = function(options,cb) {
 			}
 			var repo = new Repo(tempDirectory);
 
-			commitWidget(widgetName, function done() {
+			commitWidget(widgetName, options,function done() {
 				if (env == "product") {
 					// package.pack(projectDir, function() {
 					// 	deleteTempDirectory();
@@ -76,7 +77,7 @@ exports.sync = function(options,cb) {
 				}
 			});
 
-			function commitWidget(widgetName, cb) {
+			function commitWidget(widgetName,options, cb) {
 
 				repo.loadWidget(widgetName, function(widget) {
 					if (!widget) {
@@ -84,7 +85,7 @@ exports.sync = function(options,cb) {
 						return;
 					}
 					console.log("updoading widget: " + widgetName + "...");
-					api.commit(user, widget, comment, function(code) {
+					api.commit(user, options , function(code) {
 						if (code == 200) {
 							console.log("updoad " + widgetName + " success");
 						} else {
