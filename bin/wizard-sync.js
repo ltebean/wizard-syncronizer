@@ -90,7 +90,7 @@ exports.sync = function(options,cb) {
 						if (code == 200) {
 							info+=logAndReturn("upload " + widgetName + " success")
 						} else {
-							info+=logAndReturn("upload " + widgetName + " failed")
+							info+=logAndReturn("upload " + widgetName + " failed:"+code)
 						}
 						cb("done");
 					});

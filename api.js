@@ -50,7 +50,7 @@ API.prototype.commit = function(user, widget, comment,clearCache, cb) {
 		if (!error && response.statusCode == 200) {
 			cb(200)
 		} else {
-			cb(403);
+			cb(body);
 		}
 	});
 }
