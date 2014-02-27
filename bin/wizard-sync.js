@@ -85,12 +85,12 @@ exports.sync = function(options,cb) {
 						info+=logAndReturn("widget not found: " + widgetName)
 						return cb();
 					}
-					info+=logAndReturn("updoading widget: " + widgetName + "...");
+					info+=logAndReturn("uploading widget: " + widgetName + "...");
 					api.commit(user, widget,comment, options.clearCache , function(code) {
 						if (code == 200) {
-							info+=logAndReturn("updoad " + widgetName + " success")
+							info+=logAndReturn("upload " + widgetName + " success")
 						} else {
-							info+=logAndReturn("updoad " + widgetName + " failed")
+							info+=logAndReturn("upload " + widgetName + " failed")
 						}
 						cb("done");
 					});
