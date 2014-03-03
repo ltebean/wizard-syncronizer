@@ -76,8 +76,12 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 				widget.layoutName = config.layoutName || "";
 				widget.layoutRule = config.layoutRule || "";
 			}
-		}		
-		cb(widget);
+		}
+		if(widget.modes.display.code){
+			cb(widget);
+		}else{
+			cb();
+		}
 	});
 };
 
