@@ -28,7 +28,7 @@ API.prototype.login = function(name, password, cb) {
 	)
 };
 
-API.prototype.commit = function(user, widget, comment,clearCache, cb) {
+API.prototype.commit = function(user, widget, comment,clearCache,appNames, cb) {
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + user.id);
 	var jar = request.jar()
@@ -36,7 +36,8 @@ API.prototype.commit = function(user, widget, comment,clearCache, cb) {
 	var content = {
 		widget: widget,
 		comment: comment,
-		clearCache:clearCache
+		clearCache:clearCache,
+		appNames:appNames
 	}
 	request({
 		url: "http://" + domain + "/admin/api/widget/commit",

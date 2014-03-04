@@ -86,7 +86,7 @@ exports.sync = function(options,cb) {
 						return cb();
 					}
 					info+=logAndReturn("uploading widget: " + widgetName + "...");
-					api.commit(user, widget,comment, options.clearCache , function(code) {
+					api.commit(user, widget,comment, options.clearCache,options.appNames , function(code) {
 						if (code == 200) {
 							info+=logAndReturn("upload " + widgetName + " success")
 						} else {
