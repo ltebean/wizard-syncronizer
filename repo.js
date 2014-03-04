@@ -72,9 +72,11 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 			}  else if (file.indexOf('/' + widgetName + ".widget") != -1) {
 				console.log("found: " + file);
 				var config = yaml.load(fs.readFileSync(file).toString())
-				widget.parentWidgetName = config.parentWidgetName || "";
-				widget.layoutName = config.layoutName || "";
-				widget.layoutRule = config.layoutRule || "";
+				if(config){
+					widget.parentWidgetName = config.parentWidgetName || "";
+					widget.layoutName = config.layoutName || "";
+					widget.layoutRule = config.layoutRule || "";
+				}				
 			}
 		}
 		if(widget.modes.display.code){

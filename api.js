@@ -167,7 +167,7 @@ API.prototype.preview = function(user,shopId, widget, cb) {
 var apiPool = {
 	alpha: new API("alpha.wizard.dp"),
 	beta: new API("beta.wizard.dp"),
-	pre: new API("pre.wizard.dp"),
+	pre: new API("ppe.wizard.dp"),
 	product: new API("wizard.dp")
 }
 
