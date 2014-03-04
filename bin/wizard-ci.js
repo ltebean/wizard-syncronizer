@@ -32,7 +32,7 @@ app.post('/admin/ci/sync', function(req,res){
     	comment:req.body.comment,
     	env:req.body.env,
     	branch:req.body.branch,
-    	clearCache:req.body.clearCache
+    	clearCache:req.body.clearCache,
     	appNames:req.body.appNames||"all"
     },function(msg){
     	res.send({"msg":msg});
