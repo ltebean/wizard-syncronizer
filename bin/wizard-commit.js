@@ -44,7 +44,12 @@ exports.commit = function(options) {
 				return;
 			}
 			console.log("updoading widget: " + widgetName + "...");
-			api.commit(user, widget, comment,true, "all", function(code) {
+			api.commit({
+				widget: widget,
+				comment: comment,
+				clearCache: options.clearCache || true,
+				appNames: options.appNames || "all",
+			}, function(code) {
 				if (code == 200) {
 					console.log("updoad success");
 				} else {

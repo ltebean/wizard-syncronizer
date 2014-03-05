@@ -47,7 +47,7 @@ exports.sync = function(options,cb) {
 	console.log("create temp directory: " + tempDirectory);
 	var api = API.getAPI(env);
 
-	api.loadWidgetExtInfo(user, widgetName, function(extInfo) {
+	api.loadWidgetExtInfo(widgetName, function(extInfo) {
 		cloneAndSync(extInfo);
 	})
 
@@ -86,7 +86,13 @@ exports.sync = function(options,cb) {
 						return cb();
 					}
 					info+=logAndReturn("uploading widget: " + widgetName + "...");
-					api.commit(user, widget,comment, options.clearCache,options.appNames , function(code) {
+					
+					api.commit({
+						widget:widget,
+						comment:comment,
+						clearCache:options.clearCache||true,
+						appNames:options.appNames||"all",
+					}, function(code) {
 						if (code == 200) {
 							info+=logAndReturn("upload " + widgetName + " success")
 						} else {

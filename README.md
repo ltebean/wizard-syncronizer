@@ -20,17 +20,6 @@ example:
 	
 	wizard login -l name -p password -e alpha
 	
-### Add Configuration
-
-	wizard config --help
-	
-	Options:
-    -g, --git [git]          git repo
-    -d, --baseDir [baseDir]  the baseDir to search from
-	
-example:
-	
-	wizard config -g http://code.dianpingoa.com/apple/shop-web
 	
 ### Sync a module from remote repo to server
 
@@ -45,16 +34,3 @@ example:
 example: sync the promo module on branch "feature" to alpha server 
 	
 	wizard sync -n promo -m comment -b feature -e alpha
-
-### Preview a module
-
-	wizard preview --help
-	
-	Options:
-    -n, --name [name]      name of the module to preview
-    -s, --shopId [shopId]  shopId
-    -e, --env [env]        which environment {alpha|beta|pre|product}
-	
-example: preview promo module in alpha environment
-	
-	wizard preview -n promo -s 500447 -e alpha

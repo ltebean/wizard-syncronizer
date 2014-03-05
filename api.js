@@ -1,4 +1,5 @@
 var request = require("request");
+var config = require("./config.js");
 
 function API(domain) {
 	this.domain = domain;
@@ -28,17 +29,11 @@ API.prototype.login = function(name, password, cb) {
 	)
 };
 
-API.prototype.commit = function(user, widget, comment,clearCache,appNames, cb) {
+API.prototype.commit = function(options, cb) {
 	var domain = this.domain;
-	var cookie=request.cookie("u=" + user.id);
+	var cookie=request.cookie("u=" + getUser().id);
 	var jar = request.jar()
-	jar.add(cookie)
-	var content = {
-		widget: widget,
-		comment: comment,
-		clearCache:clearCache,
-		appNames:appNames
-	}
+	jar.add(cookie)	
 	request({
 		url: "http://" + domain + "/admin/api/widget/commit",
 		headers: {
@@ -46,7 +41,7 @@ API.prototype.commit = function(user, widget, comment,clearCache,appNames, cb) {
 		},
 		jar:jar,
 		method: "POST",
-		body: JSON.stringify(content)
+		body: JSON.stringify(options)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			cb(200)
@@ -57,9 +52,9 @@ API.prototype.commit = function(user, widget, comment,clearCache,appNames, cb) {
 }
 
 
-API.prototype.loadWidgetExtInfo = function(user,widgetName,cb) {
+API.prototype.loadWidgetExtInfo = function(widgetName,cb) {
 	var domain = this.domain;
-	var cookie=request.cookie("u=" + user.id);
+	var cookie=request.cookie("u=" + getUser().id);
 	var jar = request.jar()
 	jar.add(cookie)
 	
@@ -79,9 +74,9 @@ API.prototype.loadWidgetExtInfo = function(user,widgetName,cb) {
 	});
 }
 
-API.prototype.createWidget = function(user,widgetExtInfo,cb) {
+API.prototype.createWidget = function(widgetExtInfo,cb) {
 	var domain = this.domain;
-	var cookie=request.cookie("u=" + user.id);
+	var cookie=request.cookie("u=" + getUser().id);
 	var jar = request.jar()
 	jar.add(cookie)
 	
@@ -103,9 +98,9 @@ API.prototype.createWidget = function(user,widgetExtInfo,cb) {
 }
 
 
-API.prototype.loadAllWidget = function(user,cb) {
+API.prototype.loadAllWidget = function(cb) {
 	var domain = this.domain;
-	var cookie=request.cookie("u=" + user.id);
+	var cookie=request.cookie("u=" + getUser().id);
 	var jar = request.jar()
 	jar.add(cookie)
 	
@@ -125,9 +120,9 @@ API.prototype.loadAllWidget = function(user,cb) {
 	});
 }
 
-API.prototype.loadAllLayout = function(user,cb) {
+API.prototype.loadAllLayout = function(cb) {
 	var domain = this.domain;
-	var cookie=request.cookie("u=" + user.id);
+	var cookie=request.cookie("u=" + getUser().id);
 	var jar = request.jar()
 	jar.add(cookie)
 	
@@ -147,22 +142,9 @@ API.prototype.loadAllLayout = function(user,cb) {
 	});
 }
 
-API.prototype.preview = function(user,shopId, widget, cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + user.id);
-	var jar = request.jar()
-	jar.add(cookie)
-	request({
-		url: "http://" + domain + "/admin/wizardPreviewAction.action",
-		headers: {
-			"Content-type": "application/x-www-form-urlencoded"
-		},
-		jar:jar,
-		method: "POST",
-		body: "shopId="+shopId+"&widgetString="+encodeURIComponent(JSON.stringify(widget))
-	}, function(error, response, body) {
-		cb(body);
-	});
+
+function getUser(){
+	return config.loadConfig().user;
 }
 
 var apiPool = {
