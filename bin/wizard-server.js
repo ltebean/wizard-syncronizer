@@ -23,8 +23,13 @@ app.configure(function () {
 });
 
 app.get('/api/widget/:widgetName', function(req,res){
-	repo.loadWidget(req.params.widgetName,function(widget){
-		res.send(widget);
+	repo.loadWidget(req.params.widgetName,function(err,widget){
+		if(err){
+			return res.send({});
+		}
+		else{
+		    return res.send(widget);
+		}
 	})
 }); 
 

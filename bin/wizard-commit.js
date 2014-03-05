@@ -51,7 +51,7 @@ exports.commit = function(options) {
 			});
 		}
 
-	], function(err, result) {
+	], function done(err, result) {
 		if(err){
 			console.log("upload failed:"+err.messsage);
 		}else{

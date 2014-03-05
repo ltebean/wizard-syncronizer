@@ -55,7 +55,7 @@ app.post('/admin/ci/sync/widgetExtInfo', function(req, res) {
 			}
 			cb(null);
 		})
-	}, function(err) {
+	}, function done(err) {
 		res.send(info)
 	})
 });

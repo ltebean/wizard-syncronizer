@@ -81,7 +81,7 @@ exports.sync = function(options, callback) {
 						cb(err);
 					});
 		}
-	], function(err, result) {
+	], function done(err, result) {
 		if(err){
 			info += logAndReturn("sync error:" + err.message);
 		}else{
