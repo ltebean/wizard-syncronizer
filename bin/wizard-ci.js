@@ -46,7 +46,7 @@ app.post('/admin/ci/sync', function(req, res) {
 app.post('/admin/ci/sync/widgetExtInfo', function(req, res) {
 	var envs = ['alpha', 'beta', 'pre', 'product'];
 	var info = "";
-	async.eachSeries(envs, function(env， cb) {
+	async.eachSeries(envs, function(env,cb) {
 		api.createWidget(user, req.body, function(err) {
 			if (err) {
 				info += "sync " + env + " success"
