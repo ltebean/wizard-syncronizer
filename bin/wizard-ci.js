@@ -49,9 +49,9 @@ app.post('/admin/ci/sync/widgetExtInfo', function(req, res) {
 	async.eachSeries(envs, function(env,cb) {
 		API.getAPI(env).createWidget(req.body, function(err) {
 			if (err) {
-				info += "sync " + env + " success\n"
+				info += env + ":failed \n"
 			} else {
-				info += "sync " + env + " failed\n"
+				info += env + ":success \n"
 			}
 			cb(null);
 		})
