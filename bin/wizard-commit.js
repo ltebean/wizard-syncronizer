@@ -3,7 +3,7 @@
 var Repo = require("../repo.js");
 var API = require("../api.js");
 var config = require("../config.js");
-
+var async = require("async");
 var conf = config.loadConfig();
 
 exports.commit = function(options) {
@@ -32,30 +32,30 @@ exports.commit = function(options) {
 		return;
 	}
 
-	commitFromDir(process.cwd());
-
-	function commitFromDir(baseDir) {
-
-		var api = API.getAPI(env);
-		var repo = new Repo(baseDir);
-		repo.loadWidget(widgetName, function(widget) {
-			if (!widget) {
-				console.log("widget not found: " + widgetName);
-				return;
-			}
-			console.log("updoading widget: " + widgetName + "...");
+	async.waterfall([
+		function loadWidget(cb) {
+			var repo = new Repo(process.cwd());
+			repo.loadWidget(widgetName, function(err, widget) {
+				cb(err, widget);
+			});
+		},
+		function commitWidget(widget, cb) {
+			var api=API.getAPI(env);
 			api.commit({
 				widget: widget,
 				comment: comment,
 				clearCache: options.clearCache || true,
 				appNames: options.appNames || "all",
-			}, function(code) {
-				if (code == 200) {
-					console.log("updoad success");
-				} else {
-					console.log("updoad failed");
-				}
+			}, function(err) {
+				cb(err);
 			});
-		})
-	}
+		}
+
+	], function(err, result) {
+		if(err){
+			console.log("upload failed:"+err.messsage);
+		}else{
+			console.log("upload success");
+		}
+	})
 }

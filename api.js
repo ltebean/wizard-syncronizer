@@ -20,9 +20,9 @@ API.prototype.login = function(name, password, cb) {
 
 		}, function(error, response, body) {
 			if (!error && response.statusCode == 200) {
-				cb(JSON.parse(body))
+				cb(null,JSON.parse(body))
 			} else {
-				cb();
+				cb(new Error(response.statusCode),null);
 			}
 		}
 
@@ -44,9 +44,9 @@ API.prototype.commit = function(options, cb) {
 		body: JSON.stringify(options)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(200)
+			cb(null,null)
 		} else {
-			cb(response.statusCode);
+			cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -67,9 +67,9 @@ API.prototype.loadWidgetExtInfo = function(widgetName,cb) {
 		method: "GET"
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(JSON.parse(body))
+			cb(null,JSON.parse(body))
 		} else {
-			cb(403);
+			cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -90,9 +90,9 @@ API.prototype.createWidget = function(widgetExtInfo,cb) {
 		body: JSON.stringify(widgetExtInfo)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(200);
+			cb(null,null);
 		} else {
-			cb(403);
+			cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -113,9 +113,9 @@ API.prototype.loadAllWidget = function(cb) {
 		method: "GET"
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(JSON.parse(body))
+			cb(null,JSON.parse(body))
 		} else {
-			cb(403);
+			cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -135,9 +135,9 @@ API.prototype.loadAllLayout = function(cb) {
 		method: "GET"
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(JSON.parse(body));
+			cb(null,JSON.parse(body));
 		} else {
-			cb(403);
+			cb(new Error(response.statusCode),null);
 		}
 	});
 }

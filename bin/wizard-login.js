@@ -19,13 +19,17 @@ exports.login = function(options) {
 	}
 	var api = API.getAPI(env);
 	console.log("login...")
-	api.login(name, password, function(user) {
-		if (user) {
-			conf.user = user
-			config.saveConfig(conf);
-			console.log("login success");
-		} else {
-			console.log("login failed");
+	api.login(name, password, function(err,user) {
+		if(err){
+			console.log("login failed:"+err.message);
+			return;
 		}
+		if (!user) {
+			console.log("login failed");
+			return;
+		} 
+		conf.user = user
+		config.saveConfig(conf);
+		console.log("login success");
 	});
 }

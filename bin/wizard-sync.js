@@ -4,17 +4,18 @@ var Repo = require("../repo.js");
 var API = require("../api.js");
 var config = require("../config.js");
 var fs = require("fs");
-var package = require("../package.js")
+var package = require("../package.js");
+var async=require('async');
 
 var conf = config.loadConfig();
 
-exports.sync = function(options,cb) {
+exports.sync = function(options, callback) {
 	var widgetName = options.widgetName;
 	var env = options.env;
 	var comment = options.comment;
 	var branch = options.branch;
 
-	var info="";
+	var info = "";
 
 	if (!conf) {
 		console.log("you must first login");
@@ -43,74 +44,57 @@ exports.sync = function(options,cb) {
 	}
 	deleteTempDirectory();
 	var tempDirectory = createTempDirectory();
-	var cp = require('child_process');
 	console.log("create temp directory: " + tempDirectory);
 	var api = API.getAPI(env);
 
-	api.loadWidgetExtInfo(widgetName, function(extInfo) {
-		cloneAndSync(extInfo);
-	})
 
-	function cloneAndSync(extInfo) {
-		var command = 'git clone ' + extInfo.gitURL + " -b " + branch + " " + tempDirectory;
-		info+=logAndReturn(command);
-
-		cp.exec(command, {}, function(err, stdout, stderr) {
-			console.log(stdout);
-			console.log(stderr);
-			var projectDir = tempDirectory;
-			if (conf.baseDir) {
-				//tempDirectory = tempDirectory + "/" + conf.baseDir
-			}
-			var repo = new Repo(tempDirectory);
-
-			commitWidget(widgetName,function done() {
-				if (env == "product") {
-					// package.pack(projectDir, function() {
-					// 	deleteTempDirectory();
-					// 	console.log("delete temp directory success");
-					// })
-					cb && cb(info);
-				} else {
-					deleteTempDirectory();
-					console.log("delete temp directory success");
-					cb && cb(info);
-				}
+	async.waterfall([
+		function loadWidgetExtInfo(cb) {
+			api.loadWidgetExtInfo(widgetName, function(err, widgetExtInfo) {
+				cb(err, widgetExtInfo);
 			});
+		},
+		function cloneGitRepo(widgetExtInfo,cb) {
+			var command = 'git clone ' + widgetExtInfo.gitURL + " -b " + branch + " " + tempDirectory;
+			info += logAndReturn(command);
+			require('child_process').exec(command, {}, function(err, stdout, stderr) {
+				console.log(stdout);
+				console.log(stderr);
+				cb(err);
+			})
 
-			function commitWidget(widgetName,cb) {
-
-				repo.loadWidget(widgetName, function(widget) {
-					if (!widget) {
-						info+=logAndReturn("widget not found: " + widgetName)
-						return cb();
-					}
-					info+=logAndReturn("uploading widget: " + widgetName + "...");
-					
-					api.commit({
-						widget:widget,
-						comment:comment,
-						clearCache:options.clearCache||true,
-						appNames:options.appNames||"all",
-					}, function(code) {
-						if (code == 200) {
-							info+=logAndReturn("upload " + widgetName + " success")
-						} else {
-							info+=logAndReturn("upload " + widgetName + " failed: "+code)
-						}
-						cb("done");
+		},
+		function searchWidget(cb){
+			var repo = new Repo(tempDirectory);
+			repo.loadWidget(widgetName,function(err,widget){
+				cb(err,widget);
+			});
+		},
+		function commitWidget(widget,cb){
+			info += logAndReturn("uploading widget: " + widgetName + "...");
+			api.commit({
+						widget: widget,
+						comment: comment,
+						clearCache: options.clearCache || true,
+						appNames: options.appNames || "all",
+					}, function(err) {
+						cb(err);
 					});
-
-				})
-			}
-		});
-	}
+		}
+	], function(err, result) {
+		if(err){
+			info += logAndReturn("sync error:" + err.message);
+		}else{
+			info += logAndReturn("upload " + widgetName + " success");
+		}
+		callback && callback(info);
+	})
 
 }
 
-function logAndReturn(msg){
+function logAndReturn(msg) {
 	console.log(msg);
-	return msg+"\n";
+	return msg + "\n";
 }
 
 function createTempDirectory() {
@@ -124,7 +108,7 @@ function deleteTempDirectory() {
 	deleteFolderRecursive(path);
 }
 
-var deleteFolderRecursive = function(path) {
+function  deleteFolderRecursive(path) {
 	if (fs.existsSync(path)) {
 		fs.readdirSync(path).forEach(function(file, index) {
 			var curPath = path + "/" + file;

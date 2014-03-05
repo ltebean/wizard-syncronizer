@@ -80,30 +80,12 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 			}
 		}
 		if(widget.modes.display.code){
-			cb(widget);
+			cb(null,widget);
 		}else{
-			cb();
+			cb(new Error("widget not found"),null);
 		}
 	});
 };
 
-Repo.prototype.findAllWidget=function(cb){
-	var widgetList=[];
-	var walker = walk.walk(this.baseDir, {
-		followLinks: false,
-		filters: ["target", "WEB-INF"]
-	});
-	walker.on('file', function(root, fileStats, next) {
-		// Add this file to the list of files
-		if (fileStats.name.indexOf(".groovy") != -1) {
-			widgetList.push(new RegExp("([\\w\-]+)\.groovy").exec(fileStats.name)[1]);
-		}
-		next();
-	});
-	walker.on('end', function() {
-		cb(widgetList);
-	});
-	
-}
 
 exports = module.exports = Repo;
