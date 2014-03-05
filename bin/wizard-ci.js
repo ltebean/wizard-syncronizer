@@ -49,15 +49,14 @@ app.post('/admin/ci/sync/widgetExtInfo', function(req, res) {
 	async.eachSeries(envs, function(env,cb) {
 		API.getAPI(env).createWidget(req.body, function(err) {
 			if (err) {
-				info += "sync " + env + " success"
+				info += "sync " + env + " success\n"
 			} else {
-				info += "sync " + env + " failed"
+				info += "sync " + env + " failed\n"
 			}
 			cb(null);
 		})
 	}, function(err) {
 		res.send(info)
-
 	})
 });
 
