@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var Repo = require("../repo.js");
-var API = require("../api.js");
+var api = require("../api.js");
 var config = require("../config.js");
 var fs = require("fs");
 var package = require("../package.js");
@@ -45,13 +45,11 @@ exports.sync = function(options, callback) {
 	deleteTempDirectory();
 	var tempDirectory = createTempDirectory();
 	console.log("create temp directory: " + tempDirectory);
-	var api = API.getAPI(env);
-
 
 	async.waterfall([
 		function loadWidgetExtInfo(cb) {
-			api.loadWidgetExtInfo(widgetName, function(err, widgetExtInfo) {
-				cb(err, widgetExtInfo);
+			api[env].loadWidgetExtInfo(widgetName, function(err, widgetExtInfo) {
+				return cb(err, widgetExtInfo);
 			});
 		},
 		function cloneGitRepo(widgetExtInfo,cb) {
@@ -60,25 +58,25 @@ exports.sync = function(options, callback) {
 			require('child_process').exec(command, {}, function(err, stdout, stderr) {
 				console.log(stdout);
 				console.log(stderr);
-				cb(err);
+				return cb(err);
 			})
 
 		},
 		function searchWidget(cb){
 			var repo = new Repo(tempDirectory);
 			repo.loadWidget(widgetName,function(err,widget){
-				cb(err,widget);
+				return cb(err,widget);
 			});
 		},
 		function commitWidget(widget,cb){
 			info += logAndReturn("uploading widget: " + widgetName + "...");
-			api.commit({
+			api[env].commitWidget({
 						widget: widget,
 						comment: comment,
 						clearCache: options.clearCache || true,
 						appNames: options.appNames || "all",
 					}, function(err) {
-						cb(err);
+						return cb(err);
 					});
 		}
 	], function done(err, result) {
@@ -87,7 +85,7 @@ exports.sync = function(options, callback) {
 		}else{
 			info += logAndReturn("upload " + widgetName + " success");
 		}
-		callback && callback(info);
+		return callback && callback(info);
 	})
 
 }

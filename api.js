@@ -20,16 +20,16 @@ API.prototype.login = function(name, password, cb) {
 
 		}, function(error, response, body) {
 			if (!error && response.statusCode == 200) {
-				cb(null,JSON.parse(body))
+				return cb(null,JSON.parse(body))
 			} else {
-				cb(new Error(response.statusCode),null);
+				return cb(new Error(response.statusCode),null);
 			}
 		}
 
 	)
 };
 
-API.prototype.commit = function(options, cb) {
+API.prototype.commitWidget = function(options, cb) {
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + getUser().id);
 	var jar = request.jar()
@@ -44,9 +44,31 @@ API.prototype.commit = function(options, cb) {
 		body: JSON.stringify(options)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(null,null)
+			return cb(null,null)
 		} else {
-			cb(new Error(response.statusCode),null);
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+}
+
+API.prototype.commitLayout = function(options, cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + getUser().id);
+	var jar = request.jar()
+	jar.add(cookie)	
+	request({
+		url: "http://" + domain + "/admin/api/layout/commit",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+		body: JSON.stringify(options)
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,null)
+		} else {
+			return cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -67,9 +89,9 @@ API.prototype.loadWidgetExtInfo = function(widgetName,cb) {
 		method: "GET"
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(null,JSON.parse(body))
+			return cb(null,JSON.parse(body))
 		} else {
-			cb(new Error(response.statusCode),null);
+			return cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -90,13 +112,123 @@ API.prototype.createWidget = function(widgetExtInfo,cb) {
 		body: JSON.stringify(widgetExtInfo)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(null,null);
+			return cb(null,null);
 		} else {
-			cb(new Error(response.statusCode),null);
+			return cb(new Error(response.statusCode),null);
 		}
 	});
 }
 
+API.prototype.updateWidgetExtInfo = function(widgetExtInfo,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + getUser().id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/widget/"+widgetExtInfo.name+"/extInfo",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+		body: JSON.stringify(widgetExtInfo)
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,null);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+}
+
+API.prototype.deleteWidget = function(widgetName,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + getUser().id);
+	var jar = request.jar()
+	jar.add(cookie)	
+	request({
+		url: "http://" + domain + "/admin/api/widget/"+widgetName+"/delete",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,null);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+}
+
+API.prototype.createLayout = function(layoutExtInfo,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + getUser().id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/layout/extInfo",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+		body: JSON.stringify(layoutExtInfo)
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,null);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+}
+
+API.prototype.updateLayoutExtInfo = function(layoutExtInfo,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + getUser().id);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + "/admin/api/layout/"+layoutExtInfo.name+"/extInfo",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+		body: JSON.stringify(layoutExtInfo)
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,null);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+}
+
+API.prototype.deleteLayout = function(layoutName,cb) {
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + getUser().id);
+	var jar = request.jar()
+	jar.add(cookie)	
+	request({
+		url: "http://" + domain + "/admin/api/layout/"+layoutName+"/delete",
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,null);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+}
 
 API.prototype.loadAllWidget = function(cb) {
 	var domain = this.domain;
@@ -113,9 +245,9 @@ API.prototype.loadAllWidget = function(cb) {
 		method: "GET"
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(null,JSON.parse(body))
+			return cb(null,JSON.parse(body))
 		} else {
-			cb(new Error(response.statusCode),null);
+			return cb(new Error(response.statusCode),null);
 		}
 	});
 }
@@ -135,11 +267,59 @@ API.prototype.loadAllLayout = function(cb) {
 		method: "GET"
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			cb(null,JSON.parse(body));
+			return cb(null,JSON.parse(body));
 		} else {
-			cb(new Error(response.statusCode),null);
+			return cb(new Error(response.statusCode),null);
 		}
 	});
+}
+
+API.prototype.proxyGet=function(userCookie,url,cb){
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + userCookie);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + url,
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "GET"
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,JSON.parse(body)||200);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+
+}
+
+API.prototype.proxyPost=function(userCookie,url,body,cb){
+
+	var domain = this.domain;
+	var cookie=request.cookie("u=" + userCookie);
+	var jar = request.jar()
+	jar.add(cookie)
+	
+	request({
+		url: "http://" + domain + url,
+		headers: {
+			"Content-type": "application/json"
+		},
+		jar:jar,
+		method: "POST",
+		body: JSON.stringify(body)
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			return cb(null,body);
+		} else {
+			return cb(new Error(response.statusCode),null);
+		}
+	});
+
 }
 
 
@@ -147,13 +327,9 @@ function getUser(){
 	return config.loadConfig().user;
 }
 
-var apiPool = {
+module.exports = {
 	alpha: new API("alpha.wizard.dp"),
 	beta: new API("beta.wizard.dp"),
 	pre: new API("ppe.wizard.dp"),
 	product: new API("wizard.dp")
-}
-
-exports.getAPI=function(env){
-	return apiPool[env];
 }

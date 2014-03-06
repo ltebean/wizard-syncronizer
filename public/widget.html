@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html ng-app="Editor">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
+<title>Widget Editor</title>
+
+<!-- fav and touch icons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/admin/assets/app/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/admin/assets/app/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/admin/assets/app/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="/admin/assets/app/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="/admin/assets/app/ico/favico.png">
+<link rel="shortcut icon" href="/admin/assets/app/ico/favico.ico">
+
+<!-- theme fonts -->
+<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300italic,300,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+<!-- theme bootstrap stylesheets -->
+<link href="/admin/assets/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+<!-- theme dependencies stylesheets -->
+<link href="/admin/assets/app/css/dependencies.css" rel="stylesheet" />
+
+<!-- theme app main.css (this import of all custom css, you can use requirejs for optimizeCss or grunt to optimize them all) -->
+<link href="/admin/assets/app/css/syrena-admin.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/admin/public/js/js-yaml.js"></script>
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+<![endif]-->
+<script src="/admin/public/js/angular.js"></script>
+<script type="text/javascript" src="/admin/public/js/module/groupOperation.js"></script>
+<script type="text/javascript" src="/admin/public/js/module/widgetOperation.js"></script>
+<!-- jQuery, theme required for theme -->
+<script src="/admin/assets/jquery/jquery.js"></script>
+<script src="/admin/assets/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/admin/public/ace-builds/src-noconflict/ace.js"></script>
+
+<!-- theme dependencies -->
+<!--
+    Contents List
+    1. Raphaël
+    2. Isotope
+    3. verge
+    4. Moment
+    5. Prettify
+-->
+<script src="/admin/assets/app/js/dependencies.js"></script>
+
+<!-- other dependencies -->
+<script src="/admin/assets/jquery-icheck/jquery.icheck.min.js"></script>
+
+
+<!-- theme app main.js -->
+<script src="/admin/assets/app/js/main.js"></script>
+<script src="/admin/assets/messenger/js/messenger.min.js"></script>
+<script src="/admin/assets/messenger/js/messenger-theme-flat.js"></script>
+<script src="/admin/assets/messenger/js/messenger-theme-future.js"></script>
+<style type="text/css">
+    #editor {
+        /*position: absolute;*/
+        /*width: 100%;*/
+        /*height: 768px;*/
+        font-size: 16px;
+    }
+</style>
+<script type="text/javascript">
+    angular.module('Editor', []).factory('op', widgetOperation);
+
+    function Controller($scope, $http,op) {
+        function getURLParameter(name) {
+            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
+        }
+
+        $scope.env=getURLParameter("env");
+        $http.defaults.headers.common["X-ENV"]=$scope.env;
+
+        Messenger.options = {
+            extraClasses: 'messenger-fixed ' + 'messenger-on-top messenger-on-right',
+            theme: 'flat'
+        }
+
+        function showSuccess(msg){
+            Messenger().post({
+                message: msg,
+                type: 'success',
+                showCloseButton: true
+            });
+        }
+
+        function showError(msg){
+            Messenger().post({
+                message: msg,
+                type: 'error',
+                showCloseButton: true
+            });
+        }
+
+        var mode=getURLParameter("mode");
+
+        $http.post("/admin/api/user")
+                .success(function(data) {
+                    $scope.user=data;
+                    loadWidget();
+                }).error(function(data) {
+                    window.location.href='/admin/login.html';
+                });
+
+
+        var loadWidget = function () {
+            var widgetName = getURLParameter("name");
+            op.load(widgetName, function (data) {
+                $scope.widget = data;
+                if(!$scope.widget.modes[mode]){
+                    $scope.widget.modes[mode]={"code":"","template":"","script":""};
+                }
+
+                $scope.currentEdit = "code";
+                $scope.viewCode("code");
+            });
+        }
+
+        var initEditor = function () {
+            $scope.themes = ["eclipse", "textmate", "cobalt", "monokai", "github", "clouds", "chaos", "twilight", "dawn", "terminal"];
+            $scope.editor = ace.edit("editor");
+            $scope.editor.setTheme("ace/theme/monokai");
+            var theme = localStorage.getItem("editor:theme") || "monokai";
+            $scope.chooseTheme(theme);
+            $scope.previewShopId = localStorage.getItem("editor:preview:previewShopId") || "";
+            $scope.stylesheets = JSON.parse(localStorage.getItem("editor:preview:stylesheets"))||[{url:""}];
+
+        }
+
+        $scope.chooseTheme = function (theme) {
+            $scope.editor.setTheme("ace/theme/" + theme);
+            localStorage.setItem("editor:theme", theme);
+        }
+
+
+        $scope.viewCode = function (codeType) {
+            //save content to model
+            if (codeType != $scope.currentEdit) {
+                updateModel();
+            }
+            //change editor mode
+            if (codeType == "code") {
+                $scope.editor.getSession().setMode("ace/mode/groovy");
+            } else if (codeType == "template") {
+                $scope.editor.getSession().setMode("ace/mode/ftl");
+            } else if (codeType == "script") {
+                $scope.editor.getSession().setMode("ace/mode/ftl");
+            } else if (codeType == "config") {
+                $scope.editor.getSession().setMode("ace/mode/yaml");
+            }
+
+            //change editor content
+            if (codeType == "config") {
+                var content = jsyaml.dump({
+                    layoutName: $scope.widget.layoutName,
+                    layoutRule: $scope.widget.layoutRule,
+                    parentWidgetName:$scope.widget.parentWidgetName
+                });
+                $scope.editor.setValue(content);
+            } else {
+                $scope.editor.setValue($scope.widget.modes[mode][codeType]);
+            }
+            $scope.editor.gotoLine(1);
+            $scope.currentEdit = codeType;
+        }
+
+        var updateModel = function () {
+            if ($scope.editor.getValue() == "") {
+                return;
+            }
+            if ($scope.currentEdit == "config") {
+                var config = jsyaml.load($scope.editor.getValue());
+                $scope.widget.parentWidgetName = (config && config.parentWidgetName) || "";
+                $scope.widget.layoutName = (config && config.layoutName) || "";
+                $scope.widget.layoutRule = (config && config.layoutRule) || "";
+            } else {
+                $scope.widget.modes[mode][$scope.currentEdit] = $scope.editor.getValue();
+            }
+
+        }
+
+
+        $scope.updateWidget = function () {
+            updateModel();
+            $scope.commit.widget= $scope.widget
+            op.commit($scope.commit, function (data) {
+                showSuccess($scope.widget.name+ ' submitted')
+            });
+        }
+
+
+        $scope.loadHistory = function (page) {
+            op.loadHistory($scope.widget.name, page, function (data) {
+                if (page == 0) {
+                    $scope.histories = [];
+                }
+                $scope.histories = $scope.histories.concat(data);
+            })
+        }
+
+        $scope.revertToHistory = function (history) {
+            $scope.widget = history.widget;
+            $scope.currentEdit = "code";
+            $scope.viewCode("code");
+        }
+
+        initEditor();
+        $scope.commit={
+            clearCache:true,
+            appNames:"all"
+        };
+    }
+</script>
+</head>
+
+<body  ng-controller="Controller">
+<!-- content wrapper to define fullpage or container -->
+<!-- (recomended: dont change the id value) -->
+<section id="wrapper" class="container">
+<!-- define side left theme -->
+<aside class="side-left">
+    <!-- side header -->
+    <div class="side-header">
+        <!-- place your brand (recomended: dont change the id value) -->
+        <!-- (recomended: dont change the id value) -->
+        <h1 id="brand" class="brand">
+            <a href="/">
+                <!-- <i class="icon ion-waterdrop"></i> -->
+                Wizard ({{env}})
+            </a>
+        </h1><!-- /brand -->
+
+
+    </div><!-- /side header -->
+
+    <!-- side body -->
+    <div class="side-body">
+
+        <!-- separate nav for ease development -->
+        <nav class="side-nav">
+            <!-- open nav ul -->
+
+            <ul id="widgets" class="side-nav-child open">
+                <li class="side-nav-item">
+                    <a ng-click="viewCode('code')" style="word-wrap: break-word;">
+                        <i class="nav-item-icon icon ion-document"></i>
+                        {{widget.name}}.groovy
+                    </a>
+                </li>
+                <li class="side-nav-item">
+                    <a ng-click="viewCode('template')" style="word-wrap: break-word;">
+                        <i class="nav-item-icon icon ion-document"></i>
+                        {{widget.name}}.ftl
+                    </a>
+                </li>
+                <li class="side-nav-item">
+                    <a ng-click="viewCode('script')"  style="word-wrap: break-word;">
+                        <i class="nav-item-icon icon ion-document"></i>
+                        {{widget.name}}.js
+                    </a>
+                </li>
+                <li class="side-nav-item">
+                    <a ng-click="viewCode('config')" style="word-wrap: break-word;">
+                        <i class="nav-item-icon icon ion-document"></i>
+                        {{widget.name}}.widget
+                    </a>
+                </li>
+                <!-- /panel -->
+
+            </ul>
+        </nav>
+    </div><!-- /side body -->
+</aside><!-- /side left -->
+
+<!-- define content theme, use data-swipe="true" to enable gesture event -->
+<!-- (recomended: dont change the id value) -->
+<section id="content" class="content">
+    <!-- define your content header here -->
+    <header class="content-header">
+        <!-- header actions -->
+        <div class="header-actions pull-right">
+
+            <!-- (recomended: dont change the id value) -->
+            <div class="btn-group">
+                <a id="users-setting" class="btn btn-icon data-toggle" data-toggle="dropdown" role="button">
+                    <i class="icon ion-gear-b"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-extend pull-right" role="menu">
+                    <li class="dropdown-profile">
+                        <div class="dp-cover">
+                            <img class="img-bg" src="/admin/assets/app/img/cover-blur.jpg" alt="">
+                            <a class="img-avatar" href="page_profile.html">
+                                <img class="img-circle" src="/admin/assets/app/img/avatar3.png" alt="">
+                            </a>
+                            <div class="dp-details">{{user.name}}</div>
+                        </div>
+                    </li>
+                    <li class="dropdown-footer">
+                        <div class="clearfix">
+                            <a href="javascript:;" class="btn btn-sm btn-default pull-right" ng-click="logout()">Sign out</a>
+                        </div>
+                    </li><!-- /dropdown-footer -->
+                </ul><!-- /dropdown-extend -->
+            </div><!-- /btn-group setting -->
+
+
+            <!-- (recomended: dont change the id value) -->
+            <a id="toggle-aside" ng-click="loadHistory(0)" class="btn btn-icon" role="button"><i class="icon ion-navicon-round"></i></a>
+        </div><!-- /header actions -->
+
+        <!-- header actions -->
+        <div class="header-actions pull-left">
+            <!-- (recomended: dont change the id value) -->
+            <button id="toggle-content" class="btn btn-icon" type="button"><i class="icon ion-navicon-round"></i></button>
+        </div><!-- /header actions -->
+
+        <!-- your Awesome App title -->
+        <h1 class="content-title">Widget Editor - {{widget.name}}</h1>
+    </header><!-- /side left -->
+
+
+    <!-- define content row -->
+    <div class="content-spliter">
+        <!-- define your awesome apps here -->
+        <!-- (recomended: dont change the id value) -->
+        <section id="content-main" class="content-main">
+
+            <!-- your app content -->
+            <div class="content-app fixed-header">
+                <!-- app header -->
+                <div class="app-header">
+                    <div class="pull-left">
+                        <a id="save-btn" data-toggle="modal" href="#submitDialog" class="btn btn-success btn-extend be-left">
+                            save
+                            <i class="icon ion-upload"></i>
+                        </a>
+
+                    </div>
+                </div><!-- /app header -->
+
+                <!-- app body -->
+                <div id="editor" class="app-body">
+
+                    <!-- app content here -->
+                </div><!-- /app body -->
+            </div><!-- /content app -->
+
+        </section><!-- /content main -->
+
+
+
+        <!-- define your extra apps here -->
+        <!-- (recomended: dont change the id value) -->
+        <section id="content-aside" class="content-aside">
+            <!-- your module content -->
+            <div class="content-module fixed-header">
+                <!-- module header -->
+                <div class="module-header">
+                    <h3 class="module-title">
+                        <i class="icon ion-ios7-chatboxes-outline"></i> Recent Changes
+                    </h3>
+                </div><!-- /module header -->
+
+                <!-- module body -->
+                <div class="module-body">
+
+                    <!-- app module here -->
+
+                    <!-- chat module -->
+                    <div class="chats-module">
+                        <div class="cm-contact">
+                            <div class="cm-contact-separate">History</div>
+                            <a href="#" ng-click="revertToHistory(history)" ng-repeat="history in histories" class="cm-contact-item">
+                                <p class="cmci-name">{{history.comment}}
+                                    <small class="text-muted">
+                                        <i class="icon ion-person"></i> {{history.author}}
+                                        &nbsp;&nbsp;
+                                        <i class="icon ion-calendar"></i> {{history.date|date:'MM-dd HH:mm'}}
+                                    </small>
+                                </p>
+                            </a>
+
+                        </div><!-- /chat module contact -->
+                    </div><!-- /chat module -->
+
+                </div><!-- /module body -->
+            </div><!-- /content module -->
+        </section><!-- /content asside -->
+    </div><!-- /content spliter -->
+
+</section><!-- /content -->
+</section><!-- /wrapper -->
+
+<div id="submitDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Enter Comment</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form">
+                    <fieldset>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Comment:</label>
+                            <div class="col-sm-8">
+                                <input type="text" ng-model="commit.comment" class="form-control" placeholder="comment">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Clear Cache:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" ng-model="commit.clearCache"  class="">
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="commit.clearCache">
+                            <label class="col-sm-3 control-label">Which App:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="commit.appNames" class="form-control">
+                                    <option selected="selected">all</option>
+                                    <option>shop-web</option>
+                                    <option>index-web</option>
+                                    <option>shoppic-web</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </fieldset><!-- /fieldset -->
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-click="updateWidget()">
+                    submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -80,9 +80,9 @@ Repo.prototype.loadWidget = function(widgetName, cb) {
 			}
 		}
 		if(widget.modes.display.code){
-			cb(null,widget);
+			return cb(null,widget);
 		}else{
-			cb(new Error("widget not found"),null);
+			return cb(new Error("widget not found"),null);
 		}
 	});
 };

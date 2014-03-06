@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
+    <title>Sign in</title>
+
+    <!-- fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/admin/assets/app/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/admin/assets/app/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/admin/assets/app/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/admin/assets/app/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.ico">
+
+    <!-- theme fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300italic,300,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+    <!-- theme bootstrap stylesheets -->
+    <link href="/admin/assets/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+    <!-- theme dependencies stylesheets -->
+    <link href="/admin/assets/app/css/dependencies.css" rel="stylesheet" />
+
+    <!-- theme app main.css (this import of all custom css, you can use requirejs for optimizeCss or grunt to optimize them all) -->
+    <link href="/admin/assets/app/css/syrena-admin.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="/admin/public/js/js-yaml.js"></script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <script src="/admin/public/js/angular.js"></script>
+    <script type="text/javascript" src="/admin/public/js/module/groupOperation.js"></script>
+    <script type="text/javascript" src="/admin/public/js/module/widgetOperation.js"></script>
+    <!-- jQuery, theme required for theme -->
+    <script src="/admin/assets/jquery/jquery.js"></script>
+    <script src="/admin/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/admin/public/ace-builds/src-noconflict/ace.js"></script>
+
+    <!-- theme dependencies -->
+    <!--
+        Contents List
+        1. Raphaël
+        2. Isotope
+        3. verge
+        4. Moment
+        5. Prettify
+    -->
+    <script src="/admin/assets/app/js/dependencies.js"></script>
+
+    <!-- other dependencies -->
+    <script src="/admin/assets/jquery-icheck/jquery.icheck.min.js"></script>
+
+
+    <!-- theme app main.js -->
+    <script src="/admin/assets/app/js/main.js"></script>
+    <script src="/admin/assets/messenger/js/messenger.min.js"></script>
+    <script src="/admin/assets/messenger/js/messenger-theme-flat.js"></script>
+    <script src="/admin/assets/messenger/js/messenger-theme-future.js"></script>
+    <script type="text/javascript">
+
+        function AuthController ($scope,$http) {
+            Messenger.options = {
+                extraClasses: 'messenger-fixed ' + 'messenger-on-top',
+                theme: 'flat'
+            }
+
+            $scope.login=function(){
+                $http.post("/admin/api/user/login", {name:$scope.username,password:$scope.password})
+                        .success(function(data) {
+                            if(data["id"]){
+                                var date = new Date();
+                                date.setTime(date.getTime()+(60*1000*60*24*30));
+                                document.cookie="u=" + data["id"]+";expires="+date.toGMTString()+";path=/";
+                                window.location.href='/admin/index.html';
+                            }else {
+                                Messenger().post({
+                                    message: 'username or password is not valid',
+                                    type: 'error',
+                                    showCloseButton: true
+                                });
+                            }
+                        }).error(function(data) {
+                            Messenger().post({
+                                message: 'username or password is not valid',
+                                type: 'error',
+                                showCloseButton: true
+                            });
+                        });
+            }
+        }
+    </script>
+</head>
+
+<body>
+<!-- content wrapper to define fullpage or container -->
+<!-- (recomended: dont change the id value) -->
+<section id="wrapper" class="container" ng-controller="AuthController">
+    <section id="signin" class="sign-wrapper signin transition-layout">
+        <div class="row">
+            <div class="col-md-offset-4 col-sm-offset-0 col-xs-offset-0 col-md-4 col-sm-12 col-xs-12">
+                <div class="sign-brand">
+                    <div class="sign-brand-logo" style="height: 100px;">
+                    </div>
+                    <h1 class="sign-brand-name">Wizard</h1>
+                </div><!-- /sign-brand -->
+                <div class="sign-container">
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="username"  placeholder="Username" >
+                        </div><!-- /form-group -->
+                        <div class="form-group">
+                            <input type="password" class="form-control" ng-model="password" placeholder="Password" >
+                        </div><!-- /form-group -->
+                        <div class="form-group">
+                            <a class="btn btn-lg btn-primary btn-block" ng-click="login()" value="Log In" >Log In </a>
+                        </div><!-- /form-group -->
+
+                    </form>
+                </div><!-- /sign-container -->
+            </div><!-- /col -->
+        </div><!-- /row -->
+
+
+    </section><!-- /signin -->
+
+
+</section><!-- /wrapper -->
+
+</body></html>

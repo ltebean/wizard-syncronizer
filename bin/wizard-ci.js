@@ -5,7 +5,7 @@ var Repo = require("../repo.js");
 var async = require("async");
 var syncronizer = require("./wizard-sync.js");
 var config = require("../config.js");
-var API = require("../api.js");
+var api = require("../api.js");
 
 var user = config.loadConfig().user;
 
@@ -47,7 +47,24 @@ app.post('/admin/ci/sync/widgetExtInfo', function(req, res) {
 	var envs = ['alpha', 'beta', 'pre', 'product'];
 	var info = "";
 	async.eachSeries(envs, function(env,cb) {
-		API.getAPI(env).createWidget(req.body, function(err) {
+		api[env].createWidget(req.body, function(err) {
+			if (err) {
+				info += "sync "+ env + " failed; \n"
+			} else {
+				info += "sync "+ env + " success; \n"
+			}
+			cb(null);
+		})
+	}, function done(err) {
+		res.send(info)
+	})
+});
+
+app.post('/admin/ci/sync/layoutExtInfo', function(req, res) {
+	var envs = ['alpha', 'beta', 'pre', 'product'];
+	var info = "";
+	async.eachSeries(envs, function(env,cb) {
+		api[env].createLayout(req.body, function(err) {
 			if (err) {
 				info += "sync "+ env + " failed; \n"
 			} else {

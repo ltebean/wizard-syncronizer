@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html ng-app="GroupAdmin">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
+<title>Widget Dashboard</title>
+
+<!-- fav and touch icons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/admin/assets/app/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/admin/assets/app/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/admin/assets/app/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="/admin/assets/app/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="/admin/assets/app/ico/favico.png">
+<link rel="shortcut icon" href="/admin/assets/app/ico/favico.ico">
+
+<!-- theme fonts -->
+<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300italic,300,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+<!-- theme bootstrap stylesheets -->
+<link href="/admin/assets/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+<!-- theme dependencies stylesheets -->
+<link href="/admin/assets/app/css/dependencies.css" rel="stylesheet" />
+
+<!-- theme app main.css (this import of all custom css, you can use requirejs for optimizeCss or grunt to optimize them all) -->
+<link href="/admin/assets/app/css/syrena-admin.css" rel="stylesheet" />
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+<![endif]-->
+<script src="/admin/public/js/angular.js"></script>
+<script type="text/javascript" src="/admin/public/js/module/groupOperation.js"></script>
+<script type="text/javascript" src="/admin/public/js/module/eventOperation.js"></script>
+
+<!-- jQuery, theme required for theme -->
+<script src="/admin/assets/jquery/jquery.js"></script>
+<script src="/admin/assets/bootstrap/js/bootstrap.min.js"></script>
+
+<!-- theme dependencies -->
+<!--
+    Contents List
+    1. Raphaël
+    2. Isotope
+    3. verge
+    4. Moment
+    5. Prettify
+-->
+<script src="/admin/assets/app/js/dependencies.js"></script>
+
+<!-- other dependencies -->
+<script src="/admin/assets/jquery-icheck/jquery.icheck.min.js"></script>
+
+
+<!-- theme app main.js -->
+<script src="/admin/assets/app/js/main.js"></script>
+<script src="/admin/assets/messenger/js/messenger.min.js"></script>
+<script src="/admin/assets/messenger/js/messenger-theme-flat.js"></script>
+<script src="/admin/assets/messenger/js/messenger-theme-future.js"></script>
+<script src="/admin/assets/morris/morris.min.js"></script>
+
+<script type="text/javascript">
+var app=angular.module('GroupAdmin', []);
+app.factory('groupOp', groupOperation);
+app.factory('eventOp', eventOperation);
+
+
+function Controller($scope, $http, groupOp ,eventOp) {
+    Array.prototype.contains = function(item){
+        return RegExp("(^|,)" + item.toString() + "($|,)").test(this);
+    };
+
+    Messenger.options = {
+        extraClasses: 'messenger-fixed ' + 'messenger-on-top messenger-on-right',
+        theme: 'flat'
+    }
+
+    function showSuccess(msg){
+        Messenger().post({
+            message: msg,
+            type: 'success',
+            showCloseButton: true
+        });
+    }
+
+    function showError(msg){
+        Messenger().post({
+            message: msg,
+            type: 'error',
+            showCloseButton: true
+        });
+    }
+
+    $http.post("/admin/api/user")
+            .success(function(data) {
+                if(!data){
+                    window.location.href='/admin/login.html';
+                }else{
+                    $scope.user=data;
+                    refresh();
+                }
+            }).error(function(data) {
+                window.location.href='/admin/login.html';
+            });
+
+    var refresh = function () {
+        groupOp.loadAllWidget(function (data) {
+            $scope.groups = data;
+            for(groupName in $scope.groups ) {
+                if($scope.hasRight(groupName)){
+                    $scope.viewGroup(groupName);
+                    break;
+                }
+            }
+        })
+    }
+
+    $scope.viewGroup = function (groupName) {
+        $scope.currentGroupName= groupName;
+        $scope.currentGroup = $scope.groups[groupName];
+        $scope.viewAllWidgets();
+        $scope.loadStatData(groupName);
+
+    }
+
+    $scope.viewWidgetsInCategory=function(category){
+        $scope.currentCategory=category;
+        $scope.currentWidgets=$scope.currentGroup[category];
+        initPanelControls();
+    }
+
+    $scope.viewAllWidgets=function(){
+        var result=[];
+        for (var category in $scope.currentGroup) {
+            if ($scope.currentGroup.hasOwnProperty(category)) {
+                if(angular.isArray($scope.currentGroup[category])) {
+                    result=result.concat($scope.currentGroup[category])
+                }
+            }
+        }
+        $scope.currentCategory="all";
+        $scope.currentWidgets=result;
+        initPanelControls();
+
+    }
+
+    $scope.hasRight = function(groupName){
+        if(!$scope.user){
+            return false;
+        }
+        return $scope.user.rights.contains(groupName);
+    }
+
+
+    $scope.prepareAddWidget=function(){
+        if($scope.widgetToAdd){
+            return;
+        }
+        $scope.widgetToAdd={
+            group:{
+                name:$scope.user.rights[0],
+                category:"whatever"
+            }
+        }
+    }
+
+    $scope.createWidget = function (widgetToAdd) {
+        $http.post("/admin/api/sync/widget/extinfo",widgetToAdd)
+                        .success(function(data) {
+                            showSuccess(data)
+                            $scope.currentGroup = $scope.groups[widgetToAdd.group.name];
+                            $scope.groups[widgetToAdd.group.name][widgetToAdd.group.category].push(widgetToAdd);
+
+                        }).error(function(data) {
+                            showError(data);
+                        });
+    }
+
+    $scope.prepareUpdateWidget=function(widgetExtInfo){
+        $scope.widgetToUpdate=widgetExtInfo;
+    }
+
+    $scope.updateWidget=function(widgetToUpdate){
+        $http.post("/admin/api/sync/widget/"+widgetToUpdate.name+"/extinfo",widgetToUpdate)
+            .success(function(data) {
+                showSuccess(data)
+                        
+            }).error(function(data) {
+                showError(data);
+            });
+    }
+
+    $scope.prepareSyncWidget=function(widgetExtInfo){
+        $scope.sync={
+            env:'alpha',
+            clearCache:true,
+            appNames:"all"
+        };
+        $scope.widgetToSync=widgetExtInfo;
+    }
+
+    $scope.syncWidget=function(){
+        var options={
+            widgetName:$scope.widgetToSync.name,
+            comment:$scope.sync.comment,
+            env:$scope.sync.env,
+            branch:$scope.sync.env=='alpha'?($scope.sync.branch||'alpha'):'master',
+            clearCache:$scope.sync.clearCache,
+            appNames:$scope.sync.appNames
+        }
+        $http.post("/admin/ci/sync", options)
+            .success(function (data) {
+                showSuccess(data.msg);
+            }).error(function (data) {
+                showError(data);
+            });
+    }
+
+    $scope.deleteWidget = function (widget) {
+        $http.post("/admin/api/sync/widget/"+widget.name+"/delete")
+            .success(function(data) {
+                showSuccess(data)                 
+            }).error(function(data) {
+                showError(data);
+        });
+       
+    }
+
+    $scope.prepareDeleteWidget=function(widget){
+        $scope.widgetToDelete=widget;
+    }
+
+    $scope.viewWidget = function (widget,mode){
+        window.open('/admin/widget.html?name='+widget+'&mode='+mode);
+    }
+
+    $scope.logout=function(){
+        document.cookie="u=0;path=/";
+        window.location.href='/admin/login.html';
+    }
+
+    $scope.currentHistoryPage=0;
+    $scope.refreshHistory = function() {
+        $http.get("/admin/api/widget/histories?page=0")
+                .success(function(data) {
+                    $scope.histories = data;
+                    $scope.currentHistoryPage=0;
+                }).error(function(data) {
+
+                });
+    }
+
+    $scope.loadMoreHistory = function() {
+        $scope.currentHistoryPage++;
+        $http.get("/admin/api/widget/histories?page="+$scope.currentHistoryPage)
+                .success(function(data) {
+                    $scope.histories = data;
+                }).error(function(data) {
+
+                });
+    }
+
+
+    $scope.expandStatus={};
+
+    $scope.toggleExpandWidget=function(widget){
+        if($scope.expandStatus[widget.name]){
+            $scope.expandStatus[widget.name]=false;
+        }else{
+            $scope.expandStatus[widget.name]=true;
+            setTimeout(function(){
+                $scope.drawChart(widget)
+            },200)
+        }
+    }
+
+    $scope.collapseAllWidget=function(){
+        $scope.currentWidgets.forEach(function(widget){
+            $scope.expandStatus[widget.name]=false;
+        })
+    }
+
+    $scope.expandAllWidget=function(){
+        $scope.currentWidgets.forEach(function(widget){
+            $scope.expandStatus[widget.name]=true;
+            setTimeout(function(){
+                $scope.drawChart(widget)
+            },200);
+        })
+    }
+
+    $scope.toggleFullScreenWidget=function(widget){
+        setTimeout(function(){
+            $scope.drawChart(widget)
+        },200);
+    }
+
+    $scope.loadStatData=function(groupName){
+        $http.get("/admin/api/statistics/widgetExecutionEvent/group/"+groupName+"/last/1/days")
+                .success(function(data) {
+                    $scope.statData=data;
+                }).error(function(data) {
+
+                });
+    }
+
+    $scope.drawnWidget={};
+    $scope.drawChart=function(widget){
+        var data=$scope.statData[widget.name];
+        if($scope.drawnWidget[widget.name]){
+            $scope.drawnWidget[widget.name].redraw();
+        }else{
+            $scope.drawnWidget[widget.name]= Morris.Line({
+                element: widget.name+"-chart",
+                data: data,
+                lineColors: ['#3498db', '#f39c12'],
+                gridTextColor: '#34495e',
+                xkey: 'createDate',
+                ykeys: ['avgExecutionTime'],
+                labels: ['avgTime'],
+                hideHover: 'auto',
+                pointSize:0,
+                dateFormat:function (x) { return moment(x).format("hh:mm") }                  });
+        }
+    }
+
+    function initPanelControls(){
+
+        setTimeout(function(){
+
+            var callback_panel = function(){
+                $('.magic-layout').isotope('reLayout');
+            };
+            $('[data-toggle="tab"], [data-toggle="collapse"]').on('click', function(){
+                var $this = $(this),
+                        target = $this.attr('href');
+
+                $(target).bind("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function(){
+                    callback_panel();
+                });
+            })
+            // close a panel
+            //                    $('.panel [data-close]').on('click', function(e){
+            //                        e.preventDefault();
+            //                        var $this = $(this),
+            //                                panel = $this.attr('data-close');
+            //
+            //                        $(panel).hide(300, function(){
+            //                            $('.magic-layout').isotope('remove', $(this));
+            //                        });
+            //                    });
+            // collapse a panel
+            $('.panel-collapsed .panel-body').hide(100, callback_panel);
+            $('.panel-collapsed .table').hide(100, callback_panel);
+            $('.panel-collapsed .list-group').hide(100, callback_panel);
+            $('.panel [data-collapse]').on('click', function(e){
+                e.preventDefault();
+                var $this = $(this),
+                        panel = $this.attr('data-collapse'),
+                        panel_body = $(panel).children('.panel-body'),
+                        table = $(panel).children('.table'),
+                        list_group = $(panel).children('.list-group');
+
+                $(panel).toggleClass('panel-collapsed');
+                $(panel_body).slideToggle(200, callback_panel);
+                $(table).slideToggle(200, callback_panel);
+                $(list_group).slideToggle(200, callback_panel);
+            });
+            $('[data-toggle="panel-collapse"]').on('dblclick', function(e){
+                e.preventDefault();
+                var $this = $(this),
+                        panel = $this.attr('data-panel'),
+                        panel_body = $(panel).children('.panel-body'),
+                        table = $(panel).children('.table'),
+                        list_group = $(panel).children('.list-group');
+
+                $(panel).toggleClass('panel-collapsed');
+                $(panel_body).slideToggle(200, callback_panel);
+                $(table).slideToggle(200, callback_panel);
+                $(list_group).slideToggle(200, callback_panel);
+            });
+            $('.panel > .panel-heading > .panel-icon').on('dblclick', function(e){
+                e.preventDefault();
+                var $this = $(this),
+                        panel = $this.parent().parent(),
+                        panel_body = panel.children('.panel-body'),
+                        table = panel.children('.table'),
+                        list_group = panel.children('.list-group');
+
+                panel.toggleClass('panel-collapsed');
+                panel_body.slideToggle(200, callback_panel);
+                table.slideToggle(200, callback_panel);
+                list_group.slideToggle(200, callback_panel);
+            });
+            // expand panel
+            $('.panel [data-expand]').on('click', function(e){
+                e.preventDefault();
+                var $this = $(this),
+                        panel = $this.attr('data-expand');
+
+                $(panel).toggleClass('expand');
+                callback_panel();
+            });
+            // refresh panel
+            $('.panel [data-refresh]').on('click', function(e){
+                e.preventDefault();
+                var $this = $(this),
+                        panel = $this.attr('data-refresh');
+
+                $(panel).append('<div class="panel-progress"><div class="panel-spinner"></div></div>');
+
+
+                // Your ajax place here to remove panel-progress, we just use setTimeout to simple demo
+            })
+            $('.close').on('click', function(){
+                callback_panel();
+            });
+        },1000);
+    }
+
+
+}
+</script>
+
+</head>
+
+<body  ng-controller="Controller">
+<!-- content wrapper to define fullpage or container -->
+<!-- (recomended: dont change the id value) -->
+<section id="wrapper" class="container">
+<!-- define side left theme -->
+<aside class="side-left">
+    <!-- side header -->
+    <div class="side-header">
+        <!-- place your brand (recomended: dont change the id value) -->
+        <!-- (recomended: dont change the id value) -->
+        <h1 id="brand" class="brand">
+            <a href="/">
+                <!-- <i class="icon ion-waterdrop"></i> -->
+                Wizard
+            </a>
+        </h1><!-- /brand -->
+    </div><!-- /side header -->
+
+    <!-- side body -->
+    <div class="side-body">
+
+        <!-- separate nav for ease development -->
+        <nav class="side-nav">
+            <!-- open nav ul -->
+            <ul id="widgets" class="side-nav-child open">
+                <li class="side-nav-item-heading">
+                    <a href="javascript:" class="side-nav-item">
+                        Groups
+                    </a>
+                </li><!-- /header pages child -->
+                <li class="side-nav-item" ng-class="{active:currentGroupName==groupName}"  ng-show="hasRight(groupName)" ng-repeat="(groupName,group) in groups">
+                    <a ng-click="viewGroup(groupName)" href="javascript:;">
+                        <i class="nav-item-icon icon ion-ios7-glasses-outline"></i>
+                        {{groupName}}
+                    </a>
+                </li><!-- /panel -->
+
+            </ul>
+        </nav>
+    </div><!-- /side body -->
+</aside><!-- /side left -->
+
+<!-- define content theme, use data-swipe="true" to enable gesture event -->
+<!-- (recomended: dont change the id value) -->
+<section id="content" class="content">
+    <!-- define your content header here -->
+    <header class="content-header">
+        <!-- header actions -->
+        <div class="header-actions pull-right">
+            <!-- (recomended: dont change the id value) -->
+            <div class="btn-group">
+                <a id="notif-alerts" title="layout" class="btn btn-icon"  target="_blank" href="/admin/layoutIndex.html">
+                    <i class="icon ion-ios7-albums"></i>
+                </a>
+            </div><!-- /btn-group notifications -->
+
+            <!-- (recomended: dont change the id value) -->
+            <div class="btn-group">
+                <a id="users-setting" class="btn btn-icon data-toggle" data-toggle="dropdown" role="button">
+                    <i class="icon ion-gear-b"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-extend pull-right" role="menu">
+                    <li class="dropdown-profile">
+                        <div class="dp-cover">
+                            <img class="img-bg" src="/admin/assets/app/img/cover-blur.jpg" alt="">
+                            <a class="img-avatar" href="page_profile.html">
+                                <img class="img-circle" src="/admin/assets/app/img/avatar3.png" alt="">
+                            </a>
+                            <div class="dp-details">{{user.name}}</div>
+                        </div>
+                    </li>
+                    <li class="dropdown-footer">
+                        <div class="clearfix">
+                            <a href="javascript:;" class="btn btn-sm btn-default pull-right" ng-click="logout()">Sign out</a>
+                        </div>
+                    </li><!-- /dropdown-footer -->
+                </ul><!-- /dropdown-extend -->
+            </div><!-- /btn-group setting -->
+
+
+            <!-- (recomended: dont change the id value) -->
+            <a id="toggle-aside" ng-click="refreshHistory()" class="btn btn-icon" role="button"><i class="icon ion-navicon-round"></i></a>
+        </div><!-- /header actions -->
+
+        <!-- header actions -->
+        <div class="header-actions pull-left">
+            <!-- (recomended: dont change the id value) -->
+            <button id="toggle-content" class="btn btn-icon" type="button"><i class="icon ion-navicon-round"></i></button>
+        </div><!-- /header actions -->
+
+        <!-- your Awesome App title -->
+        <h1 class="content-title">Widget Dashboard</h1>
+    </header><!-- /side left -->
+
+
+    <!-- define content row -->
+    <div class="content-spliter">
+        <!-- define your awesome apps here -->
+        <!-- (recomended: dont change the id value) -->
+        <section id="content-main" class="content-main">
+
+            <!-- your app content -->
+            <div class="content-app fixed-header">
+                <!-- app header -->
+                <div class="app-header">
+                    <div class="input-group" style="width: 160px;float: left; margin-right: 10px;">
+                        <span class="input-group-addon bg-peterriver">
+                            <i class="icon ion-search"></i>
+                        </span>
+                        <input type="text" class="form-control" ng-model="searchKey" placeholder="search">
+                    </div>
+                    <div class="pull-left">
+                        <a ng-click="viewAllWidgets()"  style="margin-left: 5px;" class="btn btn-default" ng-class="{'btn-primary':currentCategory=='all'}" role="button">
+                            all
+                        </a>
+                        <a ng-click="viewWidgetsInCategory(category)" style="margin-left: 5px;" class="btn btn-default" ng-class="{'btn-primary':currentCategory==category}" role="button" ng-repeat="(category, widgets) in currentGroup">
+                            {{category}}
+                        </a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><i class="icon ion-chevron-down"></i>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#" ng-click="expandAllWidget()">Expand All</a></li>
+                                <li><a href="#" ng-click="collapseAllWidget()">Collapse All</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pull-right">
+                        <a data-target="#addWidgetDialog" ng-click="prepareAddWidget()" role="button" data-toggle="modal" class="btn btn-success btn-extend be-left">
+                            new
+                            <i class="icon ion-plus"></i>
+                        </a>
+                    </div>
+                </div><!-- /app header -->
+
+                <!-- app body -->
+                <div class="app-body">
+
+                    <!-- app content here -->
+                    <div class=" isotope row" data-cols="3">
+                        <div class="col-md-4" ng-repeat="widget in currentWidgets | filter:searchKey">
+                            <div id="{{widget.name}}" class="panel panel-default magic-element isotope-item" >
+                                <div class="panel-heading bg-primary text-inverse bordered-none" style="z-index: 0;">
+                                    <div class="panel-icon"><i class="icon ion-navicon-round"></i></div>
+                                    <div class="panel-actions">
+                                        <div ng-show="widget.editable==true" class="label label-warning">conf</div>
+                                        <a role="button" data-expand="#{{widget.name}}" ng-click="toggleFullScreenWidget(widget)" title="expand" class="btn btn-sm btn-icon">
+                                            <i class="icon ion-arrow-resize text-inverse"></i>
+                                        </a>
+                                        <a role="button"  ng-click="toggleExpandWidget(widget)" title="collapse" class="btn btn-sm btn-icon">
+                                            <i class="icon ion-chevron-down text-inverse"></i>
+                                        </a>
+                                        <a role="button" data-close="#{{widget.name}}" ng-click="prepareDeleteWidget(widget)" role="button" data-toggle="modal" data-target="#deleteWidgetDialog"  title="delete" class="btn btn-sm btn-icon">
+                                            <i class="icon ion-close-round text-inverse"></i>
+                                        </a>
+                                    </div><!-- /panel-actions -->
+                                    <h3 class="panel-title">{{widget.name}}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <p>
+                                        {{widget.desc}}
+
+                                    </p>
+                                    <p>
+                                        <small class="text-muted">
+                                            <i class="icon ion-social-github"></i> {{widget.gitURL}}
+                                            &nbsp;&nbsp;
+
+                                        </small>
+                                    </p>
+                                    <p>
+                                        <small class="text-muted">
+                                            <i class="icon ion-person"></i> DP
+                                            &nbsp;&nbsp;
+                                            <i class="icon ion-calendar"></i> Publish 1 day ago
+                                        </small>
+                                    </p>
+                                    <div id="{{widget.name}}-chart" class="chart" ng-show="expandStatus[widget.name]" style="height:250px;"></div>
+
+
+                                </div><!-- /panel-body -->
+                                <div class="panel-footer">
+                                    <a ng-click="prepareUpdateWidget(widget)" role="button" data-toggle="modal" data-target="#updateWidgetDialog" class="btn btn-default btn-sm btn-extend be-left">
+                                        config<i class="icon ion-gear-b"></i>
+                                    </a>
+                                    <a ng-click="prepareSyncWidget(widget)" role="button" data-toggle="modal" data-target="#syncWidgetDialog" class="btn btn-default btn-sm btn-extend be-left">
+                                        sync<i class="icon ion-upload"></i>
+                                    </a>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-extend be-left btn-sm dropdown-toggle" data-toggle="dropdown">code<i class="icon ion-wrench"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>
+                                                <a target="_blank" href="/admin/widget.html?name={{widget.name}}&mode=display&env=alpha">
+                                                    alpha
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a target="_blank" href="/admin/widget.html?name={{widget.name}}&mode=display&env=beta">
+                                                    beta
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a target="_blank" href="/admin/widget.html?name={{widget.name}}&mode=display&env=pre">
+                                                    pre
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a target="_blank" href="/admin/widget.html?name={{widget.name}}&mode=display&env=product">
+                                                    product
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-extend be-left btn-sm dropdown-toggle" data-toggle="dropdown">stat<i class="icon ion-stats-bars"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>
+                                                <a target="_blank" href="/admin/widgetStat.html?name={{widget.name}}&env=alpha">
+                                                    alpha
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a target="_blank" href="/admin/widgetStat.html?name={{widget.name}}&env=beta">
+                                                    beta
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a target="_blank" href="/admin/widgetStat.html?name={{widget.name}}&env=pre">
+                                                    pre
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a target="_blank" href="/admin/widgetStat.html?name={{widget.name}}&env=product">
+                                                    product
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>                                  
+                                </div><!-- /panel-footer -->
+                            </div>
+                        </div>
+                    </div><!-- /magic-layout -->
+
+                </div><!-- /app body -->
+            </div><!-- /content app -->
+
+        </section><!-- /content main -->
+
+
+
+        <!-- define your extra apps here -->
+        <!-- (recomended: dont change the id value) -->
+        <section id="content-aside" class="content-aside">
+            <!-- your module content -->
+            <div class="content-module fixed-header">
+                <!-- module header -->
+                <div class="module-header">
+                    <h3 class="module-title">
+                        <i class="icon ion-ios7-chatboxes-outline"></i> Histories
+                    </h3>
+                </div><!-- /module header -->
+
+                <!-- module body -->
+                <div class="module-body">
+
+                    <!-- app module here -->
+
+                    <!-- chat module -->
+                    <div class="chats-module">
+                        <div class="cm-contact">
+                            <div class="cm-contact-separate">Recent 20 updates</div>
+                            <a href="javascript:;"  ng-repeat="history in histories" class="cm-contact-item">
+                                <p class="cmci-name">{{history.widget.name}} ({{history.comment}})
+                                    <small class="text-muted">
+                                        <i class="icon ion-person"></i> {{history.author}}
+                                        &nbsp;&nbsp;
+                                        <i class="icon ion-calendar"></i> {{history.date|date:'MM-dd HH:mm'}}
+                                    </small>
+                                </p>
+                            </a>
+                        </div><!-- /chat module contact -->
+                    </div><!-- /chat module -->
+
+                </div><!-- /module body -->
+            </div><!-- /content module -->
+        </section><!-- /content asside -->
+    </div><!-- /content spliter -->
+
+</section><!-- /content -->
+</section><!-- /wrapper -->
+<div id="addWidgetDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Widget</h4>
+            </div>
+            <div class="modal-body">
+                <form name="addWidgetForm" class="form-horizontal" role="form">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Name:{{widgetToAdd.name.$valid}}</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="name" ng-model="widgetToAdd.name" class="form-control" ng-required="true" placeholder="widget name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Desc:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="desc" ng-model="widgetToAdd.desc" class="form-control" ng-required="true" placeholder="description">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Group:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="widgetToAdd.group.name" ng-options="right for right in user.rights" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Category:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="category" ng-model="widgetToAdd.group.category"  ng-required="true" class="form-control" placeholder="category">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Git:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="git" ng-model="widgetToAdd.gitURL"  ng-required="true" class="form-control" placeholder="git repository">
+                            </div>
+                        </div>
+                    </fieldset><!-- /fieldset -->
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button ng-disabled="!addWidgetForm.$valid" class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-click="createWidget(widgetToAdd)">
+                    create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="updateWidgetDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{widgetToUpdate.name}}</h4>
+            </div>
+            <div class="modal-body">
+                <form name="updateWidgetForm" class="form-horizontal" role="form">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Desc:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="desc" ng-required="true" ng-model="widgetToUpdate.desc" class="form-control" placeholder="description">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Group:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="widgetToUpdate.group.name" ng-options="right for right in user.rights" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Category:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="category" ng-required="true" ng-model="widgetToUpdate.group.category" class="form-control" placeholder="category">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Git:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="git" ng-required="true" ng-model="widgetToUpdate.gitURL" class="form-control" placeholder="git repository">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Editable:</label>
+                            <div class="col-sm-8">
+                                <input class="" type="checkbox" ng-model="widgetToUpdate.editable">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Introduction:</label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control" style="width:270px;" ng-model="widgetToUpdate.introduction"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">EditUrl:</label>
+                            <div class="col-sm-8">
+                                <input type="text" ng-model="widgetToUpdate.editURL" class="form-control" placeholder="editURL">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Moveable:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" ng-model="widgetToUpdate.moveable"  class="">
+                            </div>
+                        </div>
+                    </fieldset><!-- /fieldset -->
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-disabled="!updateWidgetForm.$valid" ng-click="updateWidget(widgetToUpdate)">
+                    update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="deleteWidgetDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete {{widgetToDelete.name}}</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                Once you delete a widget, there is no going back. Please be certain.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-danger" data-dismiss="modal" aria-hidden="true"
+                        ng-click="deleteWidget(widgetToDelete)">
+                    delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="syncWidgetDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Sync {{widgetToSync.name}}</h4>
+            </div>
+            <div class="modal-body">
+                <form name="syncWidgetFrom" class="form-horizontal" role="form">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Sync to Env:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="sync.env" class="form-control">
+                                    <option selected="selected">alpha</option>
+                                    <option>beta</option>
+                                    <option>pre</option>
+                                    <option>product</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div  ng-show="sync.env=='alpha'" class="form-group">
+                            <label class="col-sm-3 control-label">From Git Branch:</label>
+                            <div class="col-sm-8">
+                                <input name="branch" type="text" ng-model="sync.branch" class="form-control" placeholder="git branch">
+                            </div>
+                        </div>
+                        <div  ng-show="sync.env!='alpha'" class="form-group">
+                            <label class="col-sm-3 control-label">From Git Branch:</label>
+                            <div class="col-sm-8">
+                                <input name="branch" type="text" value="master" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Comment:</label>
+                            <div class="col-sm-8">
+                                <input name="comment" ng-required="true" type="text" ng-model="sync.comment" class="form-control" placeholder="comment">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Clear Cache:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" ng-model="sync.clearCache"  class="">
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="sync.clearCache">
+                            <label class="col-sm-3 control-label">Which App:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="sync.appNames" class="form-control">
+                                    <option selected="selected">all</option>
+                                    <option>shop-web</option>
+                                    <option>index-web</option>
+                                    <option>shoppic-web</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                    </fieldset><!-- /fieldset -->
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-disabled="!syncWidgetFrom.$valid" ng-click="syncWidget(widgetToSync)">
+                    sync
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+</script>
+</body>
+</html>

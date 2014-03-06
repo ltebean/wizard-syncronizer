@@ -1,5 +1,5 @@
 var Repo = require("../repo.js");
-var API = require("../api.js");
+var api = require("../api.js");
 var config = require("../config.js");
 
 var conf = config.loadConfig();
@@ -17,9 +17,8 @@ exports.login = function(options) {
 		console.log("name or password cannot be null");
 		return;
 	}
-	var api = API.getAPI(env);
 	console.log("login...")
-	api.login(name, password, function(err,user) {
+	api[env].login(name, password, function(err,user) {
 		if(err){
 			console.log("login failed:"+err.message);
 			return;

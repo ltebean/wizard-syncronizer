@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html ng-app="userAdmin">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
+    <title>User Admin</title>
+
+
+    <!-- fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/admin/assets/app/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/admin/assets/app/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/admin/assets/app/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/admin/assets/app/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.ico">
+
+    <!-- theme fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300italic,300,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+    <!-- theme bootstrap stylesheets -->
+    <link href="/admin/assets/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+    <!-- theme dependencies stylesheets -->
+    <link href="/admin/assets/app/css/dependencies.css" rel="stylesheet" />
+
+    <!-- theme app main.css (this import of all custom css, you can use requirejs for optimizeCss or grunt to optimize them all) -->
+    <link href="/admin/assets/app/css/syrena-admin.css" rel="stylesheet" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="/admin/public/js/angular.js"></script>
+    <!-- jQuery, theme required for theme -->
+    <script src="/admin/assets/jquery/jquery.js"></script>
+    <script src="/admin/assets/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- theme dependencies -->
+    <!--
+        Contents List
+        1. Raphaël
+        2. Isotope
+        3. verge
+        4. Moment
+        5. Prettify
+    -->
+    <script src="/admin/assets/app/js/dependencies.js"></script>
+
+    <!-- other dependencies -->
+    <script src="/admin/assets/jquery-icheck/jquery.icheck.min.js"></script>
+
+
+    <!-- theme app main.js -->
+    <script src="/admin/assets/app/js/main.js"></script>
+    <script src="/admin/assets/messenger/js/messenger.min.js"></script>
+    <script src="/admin/assets/messenger/js/messenger-theme-flat.js"></script>
+    <script src="/admin/assets/messenger/js/messenger-theme-future.js"></script>
+    <script src="/admin/assets/morris/morris.min.js"></script>
+
+    <script type="text/javascript">
+        var app=angular.module('userAdmin', []);
+
+        function Controller($scope, $http) {
+
+            Messenger.options = {
+                extraClasses: 'messenger-fixed ' + 'messenger-on-top messenger-on-right',
+                theme: 'flat'
+            }
+
+            function showError(){
+                Messenger().post({
+                    message: 'oops, an error occurred',
+                    type: 'error',
+                    showCloseButton: true
+                });
+            }
+
+            function showSuccess(msg){
+                Messenger().post({
+                    message: msg,
+                    type: 'success',
+                    showCloseButton: true
+                });
+            }
+
+            $http.post("/admin/api/user")
+                    .success(function(data) {
+                        $scope.user=data;
+                    }).error(function(data) {
+                        window.location.href='/admin/login.html';
+                    });
+
+            $scope.refresh=function() {
+                $http.get("/admin/api/user/loadall")
+                        .success(function (data) {
+                            $scope.users = data;
+                        }).error(function (data) {
+                            showError();
+                        });
+
+            }
+
+            $scope.refresh();
+
+            $scope.prepareAddRight = function(user) {
+                $scope.user2addRight = user;
+            }
+
+            $scope.addRight = function(right) {
+                $scope.user2addRight.rights.push(right);
+                $http.post("/admin/api/user/update", $scope.user2addRight)
+                        .success(function (data) {
+                            showSuccess("user:"+$scope.user2addRight.name+" updated")
+                        }).error(function (data) {
+                            showError();
+                        });
+            }
+
+            $scope.deleteRight = function(user, right) {
+                for (var i=0; i<user.rights.length; ++i) {
+                    if(user.rights[i] == right) {
+                        user.rights.splice(i,1);
+                        break;
+                    }
+                }
+                $http.post("/admin/api/user/update", user)
+                        .success(function (data) {
+                            showSuccess("user:"+user.name+" updated")
+                        }).error(function (data) {
+                            showError();
+                        });
+            }
+
+            $scope.createUser = function(user) {
+                user.rights = [];
+                $http.post("/admin/api/user/create", user)
+                        .success(function (date) {
+                            showSuccess("user:"+user.name+" created")
+                            $scope.refresh();
+                        }).error(function (data) {
+                            showError();
+                        });
+            }
+
+            $scope.deleteUser = function(user) {
+                $http.post("/admin/api/user/delete", user.name)
+                        .success(function (data) {
+                            showSuccess("user:"+user.name+" deleted");
+                            $scope.refresh();
+                        }).error(function (data) {
+                            showError();
+                        });
+            }
+
+            $scope.prepareDeleteUser = function(user) {
+                $scope.user2delete = user;
+            }
+        }
+    </script>
+</head>
+<body ng-controller="Controller">
+<section id="wrapper" class="container">
+    <!-- define side left theme -->
+    <aside class="side-left">
+        <!-- side header -->
+        <div class="side-header">
+            <!-- place your brand (recomended: dont change the id value) -->
+            <!-- (recomended: dont change the id value) -->
+            <h1 id="brand" class="brand">
+                <a href="/">
+                    <!-- <i class="icon ion-waterdrop"></i> -->
+                    Wizard
+                </a>
+            </h1><!-- /brand -->
+
+            <!-- form search, remove class hide if you not place your brand -->
+            <!-- (recomended: dont change the id value) -->
+            <form id="smart-search" class="side-form hide" role="form">
+                <input type="text" class="form-control" data-target=".side-wrapper" placeholder="Smart Finder">
+            </form><!-- /side wrapper -->
+        </div><!-- /side header -->
+
+        <!-- side body -->
+        <div class="side-body">
+            <!-- this you can place your search result with ajax -->
+
+            <!-- separate nav for ease development -->
+            <nav class="side-nav">
+                <!-- open nav ul -->
+
+            </nav>
+        </div><!-- /side body -->
+    </aside><!-- /side left -->
+    <!-- define content theme, use data-swipe="true" to enable gesture event -->
+    <!-- (recomended: dont change the id value) -->
+    <section id="content" class="content">
+        <!-- define your content header here -->
+        <header class="content-header">
+            <!-- header actions -->
+            <div class="header-actions pull-right">
+                <!-- (recomended: dont change the id value) -->
+                <div class="btn-group">
+                    <a id="notif-alerts" title="layout" class="btn btn-icon"  target="_blank" href="/admin/layoutIndex.html">
+                        <i class="icon ion-ios7-albums"></i>
+                    </a>
+                </div><!-- /btn-group notifications -->
+
+                <!-- (recomended: dont change the id value) -->
+                <div class="btn-group">
+                    <a id="users-setting" class="btn btn-icon data-toggle" data-toggle="dropdown" role="button">
+                        <i class="icon ion-gear-b"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-extend pull-right" role="menu">
+                        <li class="dropdown-profile">
+                            <div class="dp-cover">
+                                <img class="img-bg" src="/admin/assets/app/img/cover-blur.jpg" alt="">
+                                <a class="img-avatar" href="page_profile.html">
+                                    <img class="img-circle" src="/admin/assets/app/img/avatar3.png" alt="">
+                                </a>
+                                <div class="dp-details">{{user.name}}</div>
+                            </div>
+                        </li>
+                        <li class="dropdown-footer">
+                            <div class="clearfix">
+                                <a href="javascript:;" class="btn btn-sm btn-default pull-right" ng-click="logout()">Sign out</a>
+                            </div>
+                        </li><!-- /dropdown-footer -->
+                    </ul><!-- /dropdown-extend -->
+                </div><!-- /btn-group setting -->
+            </div><!-- /header actions -->
+
+            <!-- header actions -->
+            <div class="header-actions pull-left">
+                <!-- (recomended: dont change the id value) -->
+                <button id="toggle-content" class="btn btn-icon" type="button"><i class="icon ion-navicon-round"></i></button>
+            </div><!-- /header actions -->
+
+            <!-- your Awesome App title -->
+            <h1 class="content-title">User Administration</h1>
+        </header><!-- /side left -->
+
+        <!-- define content row -->
+        <div class="content-spliter">
+            <!-- define your awesome apps here -->
+            <!-- (recomended: dont change the id value) -->
+            <section id="content-main" class="content-main">
+
+                <!-- your app content -->
+                <div class="content-app fixed-header">
+
+                    <div class="app-header">
+                        <div class="pull-right">
+                            <a data-target="#addUserDialog" role="button" data-toggle="modal" class="btn btn-success btn-extend be-left" href="">
+                                new
+                                <i class="icon ion-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- app body -->
+                    <div class="app-body">
+                        <div class=" isotope row" data-cols="2">
+
+                            <div class="col-md-6" ng-repeat="user in users">
+                                <div class="panel panel-default magic-element">
+                                    <div class="panel-body-heading bg-success">
+                                        <div class="pb-object pb-object-circle">
+                                            <img src="assets/app/img/avatar7.png" alt="">
+                                        </div><!-- /pb-object -->
+                                        <h3 class="pb-title">
+                                            {{user["name"]}}
+                                        </h3><!-- /pb-title -->
+                                        <div class="pb-actions">
+                                            <!-- Single button -->
+                                            <div class="btn-group">
+                                                <a role="button" class="btn btn-icon dropdown-toggle" data-toggle="dropdown">
+                                                    <span class="icon ion-plus text-inverse"></span>
+                                                </a>
+                                                <ul class="dropdown-menu pull-right" role="menu">
+                                                    <li><a href="#" data-toggle="modal" data-target="#addRightDialog" ng-click="prepareAddRight(user)">add right</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="#" data-toggle="modal" data-target="#deleteUserDialog" ng-click="prepareDeleteUser(user)">delete user</a></li>
+                                                </ul>
+                                            </div>
+                                        </div><!-- /pb-actions -->
+                                            <span class="pb-watermark">
+                                                <i class="icon ion-clipboard"></i>
+                                            </span><!-- /pb-watermark -->
+                                    </div><!-- /panel-body-heading -->
+
+                                    <!-- list group -->
+                                    <ul class="list-group">
+                                        <li class="list-group-item" ng-repeat="right in user.rights">
+                                            <div class="todo-list">
+                                                <div class="todo-text">{{right}}</div>
+                                                <div class="label label-danger"><a href="javascript:;" class="ion-minus" ng-click="deleteRight(user, right)"></a></div>
+                                            </div>
+                                        </li><!-- /list-group-item -->
+                                    </ul><!-- /list-group -->
+                                </div><!-- /panel todo as user -->
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </section>
+</section><!-- /wrapper -->
+<div id="addRightDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add right to {{user2addRight.name}}</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Right:</label>
+                            <div class="col-sm-8">
+                                <input type="text" ng-model="right" class="form-control" placeholder="right">
+                            </div>
+                        </div>
+                    </fieldset><!-- /fieldset -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-click="addRight(right)">
+                    submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="addUserDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add User</h4>
+            </div>
+            <div class="modal-body" ng-form="addUserForm">
+                <form class="form-horizontal" role="form">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" ng-model="user2create.name" class="form-control" placeholder="user name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Password:</label>
+                            <div class="col-sm-8">
+                                <input type="text" ng-model="user2create.password" class="form-control" placeholder="password" required>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-disabled="!addUserForm.$valid" ng-click="createUser(user2create)">
+                    create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="deleteUserDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete {{user2delete.name}}</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                Once you delete a user, there is no going back. Please be certain.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-danger" data-dismiss="modal" aria-hidden="true"
+                        ng-click="deleteUser(user2delete)">
+                    delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html ng-app="Log">
+<head>
+    <title>Event Log</title>
+    <link href="/admin/public/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/admin/public/css/ace.min.css"/>
+    <link rel="stylesheet" href="/admin/public/css/ace-responsive.min.css"/>
+    <link rel="stylesheet" href="/admin/public/css/ace-skins.min.css"/>
+    <script src="/admin/public/js/angular.js"></script>
+    <script type="text/javascript" src="/admin/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/admin/public/js/bootstrap.min.js"></script>
+    <script src="/admin/public/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/admin/public/js/module/eventOperation.js"></script>
+
+    <script type="text/javascript">
+        var app = angular.module('Log', []);
+        app.factory('eventOp', eventOperation);
+        function Controller($scope, $http, eventOp){
+            var init = function() {
+                $scope.hasLog = false;
+                eventOp.loadWidget(10, function(date){
+                    $scope.widgets = date;
+                    if(date.length>0) {
+                        $scope.viewEvent(date[0]);
+                        $scope.hasLog = true;
+                    }
+                })
+            }
+
+            $scope.viewEvent = function(widgets) {
+                $scope.currentWidgets = widgets;
+//                $scope.currentIps = widget["ip"];
+            }
+
+            init();
+        }
+    </script>
+</head>
+<body ng-controller="Controller">
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="container-fluid navbar-conntent">
+            <a class="brand" href="/admin/index.html">Wizard</a>
+            <p class="navbar-text pull-right">
+            </p>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="main-container">
+    <h1 ng-show="!hasLog">No Logs in Recent 10 Days.</h1>
+    <div ng-show="hasLog" id="sidebar">
+        <ul class="nav nav-list">
+            <li ng-repeat="widget in widgets">
+                <a ng-click="viewEvent(widget)">{{widget[0]["date"]}}</a>
+            </li>
+        </ul>
+    </div>
+    <div ng-show="hasLog" id="main-content" class="clearfix">
+        <div id="main" class="clearfix">
+            <div class="" id="page-content">
+                <div ng-repeat="currentWidget in currentWidgets">
+                    <div class="position-relative">
+                        <h3>[{{$index+1}}] {{currentWidget["name"]}} (by {{currentWidget["author"]}})</h3>
+                        <p>{{currentWidget["comment"]}}</p>
+                    </div>
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr ng-repeat="(ip, machinestate) in currentWidget['ip']">
+                                <td class="span2">{{machinestate.machine.name}}</td>
+                                <td class="span2">{{ip}}</td>
+                                <td class="span3">{{machinestate.state}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

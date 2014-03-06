@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html ng-app="LayoutAdmin">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
+    <title>Layout Admin</title>
+
+    <!-- fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/admin/assets/app/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/admin/assets/app/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/admin/assets/app/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/admin/assets/app/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.ico">
+
+    <!-- theme fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300italic,300,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+    <!-- theme bootstrap stylesheets -->
+    <link href="/admin/assets/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+    <!-- theme dependencies stylesheets -->
+    <link href="/admin/assets/app/css/dependencies.css" rel="stylesheet" />
+
+    <!-- theme app main.css (this import of all custom css, you can use requirejs for optimizeCss or grunt to optimize them all) -->
+    <link href="/admin/assets/app/css/syrena-admin.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="/admin/public/js/js-yaml.js"></script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <script src="/admin/public/js/angular.js"></script>
+    <script type="text/javascript" src="/admin/public/js/module/groupOperation.js"></script>
+    <script type="text/javascript" src="/admin/public/js/module/widgetOperation.js"></script>
+    <!-- jQuery, theme required for theme -->
+    <script src="/admin/assets/jquery/jquery.js"></script>
+    <script src="/admin/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/admin/public/ace-builds/src-noconflict/ace.js"></script>
+
+    <!-- theme dependencies -->
+    <!--
+        Contents List
+        1. Raphaël
+        2. Isotope
+        3. verge
+        4. Moment
+        5. Prettify
+    -->
+    <script src="/admin/assets/app/js/dependencies.js"></script>
+
+    <!-- other dependencies -->
+    <script src="/admin/assets/jquery-icheck/jquery.icheck.min.js"></script>
+
+
+    <!-- theme app main.js -->
+    <script src="/admin/assets/app/js/main.js"></script>
+    <script src="/admin/assets/messenger/js/messenger.min.js"></script>
+    <script src="/admin/assets/messenger/js/messenger-theme-flat.js"></script>
+    <script src="/admin/assets/messenger/js/messenger-theme-future.js"></script>
+    <script type="text/javascript">
+        var app=angular.module('LayoutAdmin', []);
+        app.factory('groupOp', groupOperation);
+        app.factory('widgetOp', widgetOperation);
+
+        function Controller($scope, $http) {
+            Array.prototype.contains = function(item){
+                return RegExp("(^|,)" + item.toString() + "($|,)").test(this);
+            };
+
+            Messenger.options = {
+                extraClasses: 'messenger-fixed ' + 'messenger-on-top messenger-on-right',
+                theme: 'flat'
+            }
+
+            function showSuccess(msg){
+                Messenger().post({
+                    message: msg,
+                    type: 'success',
+                    showCloseButton: true
+                });
+            }
+
+            function showError(msg){
+                Messenger().post({
+                    message: msg,
+                    type: 'error',
+                    showCloseButton: true
+                });
+            }
+
+
+            $http.post("/admin/api/user")
+                    .success(function(data) {
+                        if(!data){
+                            window.location.href='/admin/login.html';
+                        }else{
+                            $scope.user=data;
+                            refresh();
+                        }
+                    }).error(function(data) {
+                        window.location.href='/admin/login.html';
+                    });
+
+            var refresh = function () {
+                $http.get("/admin/api/group/layout")
+                        .success(function (data) {
+                            $scope.groups = data;
+                            for(groupName in $scope.groups ) {
+                                if($scope.hasRight(groupName)){
+                                    $scope.viewGroup(groupName);
+                                    break;
+                                }
+                            }
+                        }).error(function (data) {
+                            showError(data);
+                        });
+            }
+
+            $scope.viewGroup = function (groupName) {
+                $scope.currentGroupName= groupName
+                $scope.currentGroup = $scope.groups[groupName];
+            }
+
+            $scope.viewLayout = function (layout){
+                window.open('/admin/layout.html?name='+layout.name);
+            }
+
+            $scope.hasRight = function(groupName){
+                if(!$scope.user){
+                    return false;
+                }
+                return $scope.user.rights.contains(groupName);
+            }
+
+            $scope.prepareAddLayout=function(){
+                if($scope.layoutToCreate){
+                    return;
+                }
+                $scope.layoutToCreate={
+                    group:{
+                        name:$scope.user.rights[0],
+                        category:"whatever"
+                    }
+                }
+            }
+            $scope.createLayout=function(layout){
+                layout.author="DP";
+                $http.post("/admin/api/sync/layout/extInfo", layout)
+                        .success(function (data) {
+                            refresh();
+                            showSuccess(layout.name+ ' created');
+                        }).error(function (data) {
+                            showError(data);
+                        });
+            }
+
+            $scope.prepareUpdateLayout=function(layout){
+                $scope.layoutToUpdate=layout;
+            }
+
+            $scope.updateLayout=function(layout){
+                $http.post("/admin/api/sync/layout/"+layout.name+"/extInfo",layout)
+                        .success(function (data) {
+                            showSuccess(layout.name+ ' updated');
+                            refresh();
+                        }).error(function (data) {
+                            showError(data);
+                        });
+            }
+
+            $scope.deleteLayout = function (layout) {
+                $http.post("/admin/api/sync/layout/"+layout.name+"/delete")
+                        .success(function (data) {
+                            showSuccess(layout.name+ ' deleted');
+                            refresh();
+                        }).error(function (data) {
+                            showError(data);
+                        });
+            }
+
+            $scope.prepareDeleteLayout=function(layout){
+                $scope.layoutToDelete=layout;
+            }
+
+        }
+    </script>
+
+</head>
+
+<body  ng-controller="Controller">
+<!-- content wrapper to define fullpage or container -->
+<!-- (recomended: dont change the id value) -->
+<section id="wrapper" class="container">
+    <!-- define side left theme -->
+    <aside class="side-left">
+        <!-- side header -->
+        <div class="side-header">
+            <!-- place your brand (recomended: dont change the id value) -->
+            <!-- (recomended: dont change the id value) -->
+            <h1 id="brand" class="brand">
+                <a href="/">
+                    <!-- <i class="icon ion-waterdrop"></i> -->
+                    Wizard
+                </a>
+            </h1><!-- /brand -->
+
+            <!-- form search, remove class hide if you not place your brand -->
+            <!-- (recomended: dont change the id value) -->
+            <form id="smart-search" class="side-form hide" role="form">
+                <input type="text" class="form-control" data-target=".side-wrapper" placeholder="Smart Finder">
+            </form><!-- /side wrapper -->
+        </div><!-- /side header -->
+
+        <!-- side body -->
+        <div class="side-body">
+            <!-- this you can place your search result with ajax -->
+
+            <!-- separate nav for ease development -->
+            <nav class="side-nav">
+                <!-- open nav ul -->
+                <ul id="widgets" class="side-nav-child open">
+                    <li class="side-nav-item-heading">
+                        <a href="javascript:" class="side-nav-item">
+                            Groups
+                        </a>
+                    </li><!-- /header pages child -->
+                    <li class="side-nav-item"  ng-show="hasRight(groupName)" ng-class="{active:currentGroupName==groupName}" ng-repeat="(groupName,group) in groups">
+                        <a ng-click="viewGroup(groupName)" href="javascript:;">
+                            <i class="nav-item-icon icon ion-ios7-glasses-outline"></i>
+                            {{groupName}}
+                        </a>
+                    </li><!-- /panel -->
+
+                </ul>
+            </nav>
+        </div><!-- /side body -->
+    </aside><!-- /side left -->
+
+    <!-- define content theme, use data-swipe="true" to enable gesture event -->
+    <!-- (recomended: dont change the id value) -->
+    <section id="content" class="content">
+        <!-- define your content header here -->
+        <header class="content-header">
+            <!-- header actions -->
+            <div class="header-actions pull-right">
+
+                <!-- (recomended: dont change the id value) -->
+                <div class="btn-group">
+                    <a id="users-setting" class="btn btn-icon data-toggle" data-toggle="dropdown" role="button">
+                        <i class="icon ion-gear-b"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-extend pull-right" role="menu">
+                        <li class="dropdown-profile">
+                            <div class="dp-cover">
+                                <img class="img-bg" src="/admin/assets/app/img/cover-blur.jpg" alt="">
+                                <a class="img-avatar" href="page_profile.html">
+                                    <img class="img-circle" src="/admin/assets/app/img/avatar3.png" alt="">
+                                </a>
+                                <div class="dp-details">{{user.name}}</div>
+                            </div>
+                        </li>
+                        <li class="dropdown-footer">
+                            <div class="clearfix">
+                                <a href="javascript:;" class="btn btn-sm btn-default pull-right" ng-click="logout()">Sign out</a>
+                            </div>
+                        </li><!-- /dropdown-footer -->
+                    </ul><!-- /dropdown-extend -->
+                </div><!-- /btn-group setting -->
+
+
+                <!-- (recomended: dont change the id value) -->
+            </div><!-- /header actions -->
+
+            <!-- header actions -->
+
+            <!-- your Awesome App title -->
+            <h1 class="content-title">Layout</h1>
+        </header><!-- /side left -->
+
+
+        <!-- define content row -->
+        <div class="content-spliter">
+            <!-- define your awesome apps here -->
+            <!-- (recomended: dont change the id value) -->
+            <section id="content-main" class="content-main">
+
+                <!-- your app content -->
+                <div class="content-app fixed-header">
+                    <!-- app header -->
+                    <div class="app-header">
+                        <div class="pull-right">
+                            <a data-target="#addLayoutDialog" ng-click="prepareAddLayout()"  role="button" data-toggle="modal" class="btn btn-success btn-extend be-left">
+                                new
+                                <i class="icon ion-plus"></i>
+                            </a>
+                        </div>
+                    </div><!-- /app header -->
+
+                    <!-- app body -->
+                    <div  class="app-body row">
+                        <div class="col-md-6" ng-repeat="(category, layouts) in currentGroup" >
+
+                            <div id="panel2" class="panel panel-default magic-element isotope-item">
+                            <div class="panel-heading">
+                                <div class="panel-icon"><i class="icon ion-ios7-photos-outline"></i></div>
+
+                                <h3 class="panel-title">{{category}}</h3>
+                            </div><!-- /panel-heading -->
+
+                            <table class="table table-striped">
+                                <thead class="row">
+                                <th class="col-md-5">Name</th>
+                                <th class="col-md-1">Author</th>
+                                <th class="col-md-6"><div class="pull-right">Operation</div></th>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="layout in layouts">
+                                    <td>{{layout.name}}</td>
+                                    <td>{{layout.author}}</td>
+                                    <td>
+                                        <div class="pull-right">
+                                            <a ng-click="prepareUpdateLayout(layout)" role="button" data-toggle="modal" data-target="#updateLayoutDialog" class="btn btn-default btn-sm btn-extend be-left" href="">
+                                                config<i class="icon ion-gear-b"></i>
+                                            </a>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-extend be-left btn-sm dropdown-toggle" data-toggle="dropdown">edit<i class="icon ion-wrench"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li>
+                                                        <a target="_blank" href="/admin/layout.html?name={{layout.name}}&env=alpha">
+                                                            alpha
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a target="_blank" href="/admin/layout.html?name={{layout.name}}&env=beta">
+                                                            beta
+                                                        </a>
+                                                    </li><li>
+                                                        <a target="_blank" href="/admin/layout.html?name={{layout.name}}&env=pre">
+                                                            pre
+                                                        </a>
+                                                    </li><li>
+                                                        <a target="_blank" href="/admin/layout.html?name={{layout.name}}&env=product">
+                                                            product
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <a ng-click="prepareDeleteLayout(layout)" role="button" data-toggle="modal" data-target="#deleteLayoutDialog" class="btn btn-default btn-sm btn-extend be-left" href="">
+                                                del<i class="icon ion-trash-a"></i>
+                                            </a>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table><!-- /table-striped -->
+                        </div>
+                        </div>
+
+                        <!-- app content here -->
+                    </div><!-- /app body -->
+                </div><!-- /content app -->
+
+            </section><!-- /content main -->
+
+
+
+        </div><!-- /content spliter -->
+
+
+    </section><!-- /content -->
+</section><!-- /wrapper -->
+
+</body>
+<div id="addLayoutDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Create Layout</h4>
+            </div>
+            <div class="modal-body">
+                <form name="addLayoutForm" class="form-horizontal" role="form">
+                    <fieldset>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Name:</label>
+                            <div class="col-sm-8">
+                                <input name="name" ng-required="true" type="text" ng-model="layoutToCreate.name" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Group:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="layoutToCreate.group.name" ng-options="right for right in user.rights" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Category:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="category" ng-required="true" ng-model="layoutToCreate.group.category" placeholder="" class="form-control">
+                            </div>
+                        </div>
+
+                    </fieldset><!-- /fieldset -->
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-disabled="!addLayoutForm.$valid" ng-click="createLayout(layoutToCreate)">
+                    create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="updateLayoutDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{layoutToUpdate.name}}</h4>
+            </div>
+            <div class="modal-body">
+                <form name="updateLayoutForm" class="form-horizontal" role="form">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Group:</label>
+                            <div class="col-sm-8">
+                                <select name="env" ng-model="layoutToUpdate.group.name" ng-options="right for right in user.rights" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Category:</label>
+                            <div class="col-sm-8">
+                                <input name="category" ng-required="true" type="text" ng-model="layoutToUpdate.group.category" placeholder="" class="form-control">
+                            </div>
+                        </div>
+                    </fieldset><!-- /fieldset -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                        ng-disabled="!updateLayoutForm.$valid" ng-click="updateLayout(layoutToUpdate)">
+                    update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="deleteLayoutDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete {{layoutToDelete.name}}</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                Once you delete a layout, there is no going back. Please be certain.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+                <button class="btn btn-small btn-danger" data-dismiss="modal" aria-hidden="true"
+                        ng-click="deleteLayout(layoutToDelete)">
+                    delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

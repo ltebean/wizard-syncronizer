@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var Repo = require("../repo.js");
-var API = require("../api.js");
+var api = require("../api.js");
 var config = require("../config.js");
 var async = require("async");
 var conf = config.loadConfig();
@@ -36,18 +36,17 @@ exports.commit = function(options) {
 		function loadWidget(cb) {
 			var repo = new Repo(process.cwd());
 			repo.loadWidget(widgetName, function(err, widget) {
-				cb(err, widget);
+				return cb(err, widget);
 			});
 		},
 		function commitWidget(widget, cb) {
-			var api=API.getAPI(env);
-			api.commit({
+			api[env].commitWidget({
 				widget: widget,
 				comment: comment,
 				clearCache: options.clearCache || true,
 				appNames: options.appNames || "all",
 			}, function(err) {
-				cb(err);
+				return cb(err);
 			});
 		}
 

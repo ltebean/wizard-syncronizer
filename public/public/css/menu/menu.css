@@ -1,0 +1,182 @@
+@charset "utf-8";
+/* CSS Document */
+/* sprite */
+body{background-color: #f0ece5;}
+.arrow-up,.arrow-down,.recom-info,.dish-bttom,.menus-box .tag a.cur,.tag-down,.tag-up,.menus-icon,.dishes li.dish-selected .dishes-hover,.dishes li.dish-selected i,.dishes-bottom,.cart-tag,.invite,.cart-dishes li .dish-name,.cart-dishes li .dish-amout-hover,.dish-amout-hover .subtract:hover,.dish-amout-hover .plus:hover,.cart-bottom,.meun-shop .favorable,.meun-shop .favorable em,.recom-dish-group li.cur i,.pop-main .hd .close{ background:url(http://si1.s1.dpfile.com/s/c/app/takeaway/i/takeaway-sprite.80c0aea7670cf660b170a0144a5e7a62.png) no-repeat; }
+img{ vertical-align:top; }
+
+.dish-recom:after,.menus-mode:after,.recom-dish-group:after,.comment-list li:after
+{ content:"\20"; display: block; height: 0; visibility: hidden; clear: both; }
+.dish-recom,.menus-mode,.recom-dish-group,.comment-list li{ zoom:1; }
+
+/*公用*/
+.col-exp{ color:#999; }
+a.col-exp:hover{ color:#F00; text-decoration:underline; }
+.arrow-down,.arrow-up{ cursor:pointer; background-position: 0 3px; width:8px; height:9px; display:inline-block; *display:inline; overflow:hidden; zoom:1; margin-left:5px; *vertical-align: middle; }
+.arrow-up{ background-position:-8px 3px; }
+.col-figure{ color:#ff8400}
+.sep{ color:#e0e0e0; padding:0 10px}
+
+.index-wraper{ border-top: 4px solid #fa9103; position: relative; top: -12px; }
+.takeaway-wrap{ margin:auto; overflow:hidden; zoom:1; margin-top: 10px; }
+.takeaway-wrap .takeaway-main{ width:665px; margin:auto; }
+.takeaway-wrap .takeaway-aside{ float:left; width:280px; }
+/* 商户信息 */
+.meun-shop{ padding:10px 25px; border:1px solid #e0e0e0; border-bottom:0; }
+.meun-shop h2{ font-size:20px; font-family:"Microsoft YaHei"; padding-bottom:3px; font-weight:bold; }
+.meun-shop .comment-rst{ position:relative; zoom:1; }
+.meun-shop .comment-rst:after{ clear: both; display: block; visibility: visible; content: "\20"; }
+.meun-shop .favorable{ background-position:0 -161px; height:25px; padding-left:5px; margin-left:10px; display:inline-block; overflow:hidden; zoom:1; vertical-align:-5px; *vertical-align:0px; height:25px; }
+.meun-shop .favorable em{ background-position:right -161px; color:#ff8400; font-size:16px; padding-right:10px; line-height:25px; float:left; height:25px; }
+.comment-rst .send-time{ position:absolute; right:0; top:0; }
+.particularly-hint{ border-top:1px solid #dcd2c0; padding-top:10px; margin-top:10px; }
+.particularly-hint strong{ color:#ff8400; font-size:14px; }
+.dish-recom{ background-color:#f4f0e9; padding:25px 21px 20px 22px; position:relative; margin:0 auto 20px; width:622px; overflow:hidden; zoom:1; }
+.dish-bttom{ background-position:-55px 0; width:20px; height:20px; position:absolute; right:-1px; bottom:-1px; }
+.recom-dish-group { width:621px; padding-bottom: 10px; }
+.recom-dish-group ul{ width:680px; }
+.recom-dish-group li{ float:left; width:148px; margin-right:7px; border:1px solid #f0ece5; background-color:#fff; position:relative; zoom:1; cursor:pointer; }
+.recom-dish-group li:hover{ border:1px solid #e6a463; }
+.recom-dish-group .dish-soldout{ border:1px solid #f0ece5; cursor: default; }
+.recom-dish-group .dish-soldout .shop-pic{ opacity: 0.4; filter: alpha(opacity=40); }
+.recom-dish-group .dish-soldout:hover{ border:1px solid #f0ece5; }
+.recom-dish-group li.cur{ border-color:#e6a463; }
+.recom-dish-group li img{ width:148px; height:110px; }
+.recom-dish-group li .txt{ padding:5px 10px; font-size:14px; font-family:"Microsoft YaHei"; }
+.recom-dish-group li .dish-name{ padding-right:40px; position:relative; zoom:1; color:#555; }
+.recom-dish-group li .dish-name .price{ position:absolute; left:0; top:0; font-family:Verdana, Geneva, sans-serif; color:#999; }
+.recom-dish-group li .dish-name .price em{ color:#ff8400; }
+.recom-dish-group li .soldout{ color: #999; padding-right: 0; }
+.recom-dish-group li .soldout .soldout{ float: right; }
+.recom-dish-group li .recom-info{ background-position:-385px 3px; padding-left:20px; color:#999; }
+.dish-recom .recom-more{ padding-top:10px; text-align:center; color:#999; }
+.branch-pack{ float:left; padding-top:2px; }
+
+/* 菜单list */
+.menus-box{ overflow:hidden; zoom:1; }
+.menus-box .tag{ border:1px solid #e0e0e0; padding:15px 60px 15px 15px; width:588px; margin:auto; background-color:#fff; position:relative; zoom:1; overflow:hidden; z-index: 1; line-height: 20px; }
+.menus-box .tag .spec_exp{ height: 20px; overflow: hidden; }
+.menus-box .tag a.name{ color:#999; }
+.menus-box .tag a.name:hover{ color:#ff8400; }
+.menus-box .tag a.cur{ padding-left:10px; background-position:-396px -31px; color:#ff8400}
+.menus-box .tag .line{ padding:0 10px; color:#999; }
+.menus-box .tag .tag-down,.menus-box .tag .tag-up{ width:17px; height:18px; position:absolute; top:17px; right:25px; cursor:pointer; background-position:-18px 0; }
+.menus-box .tag .tag-up{ background-position:-36px 0; }
+.menus-list{ background-color:#f0ece5; padding:25px 25px 15px; overflow:hidden; zoom:1; }
+.menus-mode{ background-color:#fff; position:relative; padding:25px; margin-bottom:15px; width:560px; overflow:hidden; }
+.menus-mode .holder{ position: absolute; top: -50px; }
+.menus-mode .hd h6{ color:#ff8400; font-size:22px; font-family:"Microsoft YaHei"; padding-bottom:10px; }
+.menus-mode .hd .menus-icon{ background-position:-292px -0; width:20px; height:20px; margin-right:10px; display:inline-block; *display:inline; overflow:hidden; zoom:1; vertical-align:middle; }
+.menus-mode .menus-dishes{ width:785px; }
+.menus-dishes .dishes{ width:560px; margin-top: 10px; }
+.menus-dishes .dishes .dish{ border-bottom:1px solid #e5e5e5; padding:5px 0;}
+.dishes .dish .dishes-hover{ font-size:14px; color:#555; padding:5px 10px; position:relative; zoom:1; cursor: pointer; }
+.dishes .sell-out .dishes-hover{ color:#999; cursor: default; }
+.dishes .dish .dishes-hover .price{ position:absolute; left:300px; top:5px; font-family:Verdana, Geneva, sans-serif; color:#999; }
+.dishes .dish .dishes-hover .price .price-num{ color:#ff8400}
+.dishes li.dish-selected .dishes-hover,.dishes li.dish-selected .dishes-hover:hover{ background-position:0 -66px; }
+.dishes li.sell-out .dishes-hover:hover{ background: #fff; }
+/*.dishes li .pitch,.recom-dish-group li .tick{ width:18px; height:18px; position:absolute; right:8px; top:8px; background-position:-270px 0; }*/
+.dishes li.dish-selected i,.recom-dish-group li.cur i{ width:18px; height:18px; position:absolute; right:8px; top:8px; background-position:-270px 0; }
+
+.dishes-bottom{ background-position:-76px 0; width:21px; height:20px; position:absolute; bottom:0;right:0; }
+.recom-dish-group li.cur i{ right:-6px; top:-8px; }
+/* 右侧 */
+.dishes-cart{ border:1px solid #e0e0e0; padding-top:20px; position:relative; zoom:1; }
+.cart-tag{ margin:0 23px 10px; overflow:hidden; zoom:1; background-position:0 -102px; }
+.cart-tag li{ width:115px; height:27px; float:left; text-align:center; line-height:27px; font-size:14px; font-family:"Microsoft YaHei"; color:#c4c4c4; cursor:pointer; }
+.cart-tag li.cur{ color:#fff; cursor:default; }
+.invite{ background-position:0 -131px; }
+.cart-single{ background-color:#ff8400; overflow:hidden; zoom:1; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; padding:0 10px; margin:0 23px 10px; line-height:27px; height:27px; color:#fff; font-family:"Microsoft YaHei"; font-size:14px; }
+.cart-single .single-name{ font-size:20px; float:left; }
+.cart-single .line{ padding:0 10px; font-size:16px; font-family:Verdana, Geneva, sans-serif}
+.cart-time { text-align:center; padding-bottom:10px; }
+.sopt-dishes{ background-color:#f4f0e9; padding:15px 20px 30px; position: relative; }
+.sopt-dishes .no-dish{ padding: 20px 0 10px; font-size: 14px; color: #999; text-align: center; }
+.sopt-dishes .dishes-tit{ border-bottom:1px solid #e0d5c2; padding:0 90px 5px 0; margin-bottom:1px; position:relative; zoom:1; }
+.sopt-dishes .dish-name{ padding-left:10px; }
+.sopt-dishes .dish-amount{ position:absolute; right:40px; top:0; width:56px; text-align:center; }
+.sopt-dishes .dish-price{ position:absolute; right:0; top:0; }
+.cart-dishes{ border-top:1px solid #e0d5c2; padding: 5px 0 5px 0; }
+.cart-dishes li{ position:relative; zoom:1; padding:5px 5px 5px 0; }
+.cart-dishes li .dish-name{ background-position:-396px -61px; }
+.cart-dishes li .dish-amount{ top:5px; }
+.cart-dishes li .dish-price{ top:5px; }
+.cart-dishes li .amount{ border:1px solid #e2e2e1; width:24px; text-align:center; height:15px; font-family:Tahoma, Geneva, sans-serif; font-size:12px; line-height:15px; background-color:#fff; display:inline-block; *display:inline; overflow:hidden; zoom:1; }
+.cart-dishes li .dish-amout-hover{ background-position:-104px 0; overflow:hidden; zoom:1; }
+.cart-dishes li .dish-amout-hover .subtract,.cart-dishes li .dish-amout-hover .plus{ width:17px; height:19px; float:left; }
+.cart-dishes li .dish-amout-hover .amount-input{ width:22px; height:17px; float:left; border:0; margin-top:-1px; font-family:Tahoma, Geneva, sans-serif; font-size:12px; text-align:center; }
+.cart-dishes li .dish-amout-hover a.subtract:hover{ background-position:-164px 0; }
+.cart-dishes li .dish-amout-hover a.subtract:active { background-position:-203px 0; }
+.cart-dishes li .dish-amout-hover a.plus:hover{ background-position:-183px 0; }
+.cart-dishes li .dish-amout-hover a.plus:active{ background-position:-225px 0; }
+.dishes-info{ border-top:1px solid #e0d5c2; padding:8px 0 10px; text-align:right; line-height:20px; color:#999; }
+.dishes-value{ border-top:1px solid #e0d5c2; padding-top:8px; text-align:right; font-family:"Microsoft YaHei"; }
+.dishes-value strong{ font-size:32px; color:#ff8400; font-weight:normal; }
+.dishes-btn{ padding-top:10px; text-align:center; }
+/* 右边栏-购物车-提交按钮 */
+.dishes-btn .dis-big-btn{ width: 100%; cursor: pointer; display: block; }
+.dishes-btn .dis-big-btn .btn-text{ width: 236px; font-weight: bold; padding: 8px 0; font-size: 14px; line-height: 20px; -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; text-align: center; color: #fff; zoom: 1; display: inline-block; overflow: visible; border: 1px solid #ff7617; background-color: #ff7e28; background-image: -moz-linear-gradient(top, #ffaf44, #ff7e28); background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffaf44), color-stop(1, #ff7e28)); }
+.dishes-btn .dis-big-btn a:hover{ background:#fb6808; background-image: -moz-linear-gradient(top, #fe9c3d, #fb6808); background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fe9c3d), color-stop(1, #fb6808)); border-color:#eb5e00; text-decoration:none; }
+.dishes-btn  .dis-big-btn a:active{ background:#fb6808; background-image: -moz-linear-gradient(top, #fe9c3d, #fb6808); background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fe9c3d), color-stop(1, #fb6808)); border-color:#eb5e00; -moz-box-shadow:0 1px 3px #f36000 inset; -webkit-box-shadow:0 1px 3px #f36000 inset; box-shadow:0 1px 3px #f36000 inset; }
+.dishes-btn  .btn-disable{ opacity: 0.5; filter: alpha(opacity=50); }
+
+.cart-bottom{ background-position:-245px 0; width:20px; height:20px; position:absolute; bottom:0; right:0; }
+
+
+
+/* 弹出层 */
+.pop-box{ background-color:#f2f2f2; padding:3px; webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px; zoom:1; }
+.pop-main{ position: relative; border:1px solid #bbb; background-color:#fff; }
+.pop-main .hd{ background-color:#f4f4f4; height:35px; _width: 100%; padding: 0 10px; line-height:35px; position:relative; zoom:1; }
+.pop-main h3{ font-weight:normal; font-size:14px; }
+.pop-main .con{ padding:20px; zoom:1; }
+.pop-main .hd .close{ position:absolute; top:10px; background-position:-316px 0; right:8px; width:12px; height:12px; display:inline-block; *display:inline; overflow:hidden; zoom:1; vertical-align:middle;}
+.pop-main .pop-con{ padding:20px; }
+
+
+/* 点评弹出层 */
+
+/* 点评 */
+.lay-shop-comment{ width:600px; position: absolute; z-index: 1000; left: 94px; top: 20px; }
+.lay-shop-comment .hd{ background-color:#fff; }
+.lay-shop-comment .pop-con{ padding:0 10px; }
+.lay-shop-comment .comment-list{ margin-bottom:0; }
+.lay-shop-comment .comment-list li .content{ display:table-cell; *display:inline-block; width:2000px; *width:auto; table-layout:fixed; word-wrap: break-word; word-break: break-all; float:none; }
+.lay-shop-comment .comment-list li .content:after{ clear: both; display: block; visibility: visible; height: 0 !important; line-height:0; font-size: xx-large; content: "\20"; }
+.lay-shop-comment .comment-list li{ padding-bottom:15px; }
+.lay-shop-comment .comment-list li .pic { width:70px; _width:67px; float:left; margin-right:10px; _display:inline; }
+.lay-shop-comment .comment-list li .pic img{ margin-bottom:5px; width:48px; height:48px; }
+.lay-shop-comment .comment-list li .pic .name{ line-height:18px; padding:3px 0 7px; word-wrap:break-word; word-break:break-all; }
+.lay-shop-comment .contribution{ padding-bottom:5px; overflow:hidden; zoom:1; }
+.lay-shop-comment .comment-list li .com-more{ padding-left:10px; }
+.lay-shop-comment .user-info{ background-color:#f3f3f3; padding:8px 10px 5px; margin-bottom:15px; overflow:hidden; zoom:1; }
+.lay-shop-comment .user-info .item-rank-rst{ margin-right:15px; }
+.lay-shop-comment .comment-txt{ padding:0 10px 7px; line-height:20px; }
+.lay-shop-comment .comment-type .type{ padding-left:10px; }
+.lay-shop-comment .comment-recommend{ color:#999; padding:0 10px; line-height:20px; }
+.lay-shop-comment .comment-recommend .col-exp{ margin-right:10px; }
+.lay-shop-comment .misc-info{ padding:5px 10px 0; position: relative; z-index: 100; }
+.lay-shop-comment .misc-info .time{ padding-right:10px; color:#999; }
+.lay-shop-comment .misc-info .misc-name{ display:inline-block; *display:inline; overflow:hidden; zoom:1; color:#999; vertical-align:bottom; }
+.lay-shop-comment .comm-more-skip{ text-align:right; padding:10px 0 30px; }
+.lay-shop-comment .comm-per{ font-family:Verdana, Geneva, sans-serif; float:left; }
+.lay-shop-comment .comment-list .comment-rst{ margin-bottom:0; }
+.lay-shop-comment .comment-rst .rst{ padding-right:10px; }
+.lay-shop-comment .comment-more{ text-align:right; padding-bottom:10px; }
+.lay-shop-comment .comment-more a{ color:#6666cc; }
+.lay-shop-comment .comment-more a:Hover{ background-color:#6666cc; color:#fff; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

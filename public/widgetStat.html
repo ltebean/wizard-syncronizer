@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
+    <title>Widget Statistics</title>
+
+    <!-- fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/admin/assets/app/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/admin/assets/app/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/admin/assets/app/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/admin/assets/app/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.png">
+    <link rel="shortcut icon" href="/admin/assets/app/ico/favico.ico">
+
+    <!-- theme fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300italic,300,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+    <!-- theme bootstrap stylesheets -->
+    <link href="/admin/assets/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+    <!-- theme dependencies stylesheets -->
+    <link href="/admin/assets/app/css/dependencies.css" rel="stylesheet" />
+
+    <!-- theme app main.css (this import of all custom css, you can use requirejs for optimizeCss or grunt to optimize them all) -->
+    <link href="/admin/assets/app/css/syrena-admin.css" rel="stylesheet" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <script src="/admin/public/js/angular.js"></script>
+
+    <script type="text/javascript">
+
+        function Controller($scope, $http) {
+            function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
+            }
+
+
+            $scope.env=getURLParameter("env");
+            $http.defaults.headers.common["X-ENV"]=$scope.env;
+
+            $scope.widgetName= getURLParameter("name");
+
+            $http.post("/admin/api/user")
+                    .success(function(data) {
+                        if(!data){
+                            window.location.href='/admin/login.html';
+                        }else{
+                            $scope.user=data;
+                            $scope.loadData();
+
+                        }
+                    }).error(function(data) {
+                        window.location.href='/admin/login.html';
+                    });
+
+            $scope.loadData=function(days){
+                if(!days){
+                    days=1;
+                }
+                var url="/admin/api/statistics/widgetExecutionEvent/"+$scope.widgetName+"/last/"+days+"/days";
+
+                $http.get(url)
+                        .success(function(data) {
+                            if($scope.avgTimeChart){
+                                $scope.avgTimeChart.setData(data);
+                                $scope.avgTimeChart.redraw();
+                            }else{
+                                $scope.avgTimeChart=Morris.Line({
+                                    element: 'avgTime',
+                                    data: data,
+                                    lineColors: ['#3498db', '#f39c12'],
+                                    gridTextColor: '#34495e',
+                                    xkey: 'createDate',
+                                    ykeys: ['avgExecutionTime'],
+                                    labels: ['avgTime'],
+                                    hideHover: 'auto',
+                                    pointSize:0,
+                                    dateFormat:function (date) { return moment(date).format("MM-DD hh:mm") },
+                                    yLabelFormat: function (y) { return y.toString() + ' ms'; }
+                                });
+                            }
+
+                            if($scope.statusChart){
+                                $scope.statusChart.setData(data);
+                                $scope.statusChart.redraw();
+                            }else{
+                                $scope.statusChart=Morris.Line({
+                                    element: 'statusCount',
+                                    data: data,
+                                    lineColors: ['#3498db', '#e74c3c'],
+                                    gridTextColor: '#34495e',
+                                    xkey: 'createDate',
+                                    ykeys: ['successCount','failureCount'],
+                                    labels: ['successCount','failureCount'],
+                                    hideHover: 'auto',
+                                    pointSize:0,
+                                    dateFormat:function (x) { return moment(x).format("MM-DD hh:mm") }
+                                });
+                            }
+
+                        }).error(function(data) {
+                            //window.location.href='/admin/login.html';
+                        });
+            }
+
+            $('#dashboard-range .text-date').text(moment().subtract('days', 1).format('MMM D, YYYY') + ' - ' + moment().format('MMM D, YYYY'));
+
+            $('#dashboard-range').daterangepicker(
+                    {
+                        ranges: {
+                            'Last 1 Day': [moment().subtract('days', 1), moment()],
+                            'Last 3 Days': [moment().subtract('days', 3), moment()],
+                            'Last 7 Days': [moment().subtract('days', 7), moment()]
+                        },
+                        startDate: moment().subtract('days', 1),
+                        endDate: moment()
+                    },
+                    function(start, end) {
+                        var days=(moment(start).from(moment(end), true)).substring(0,1);
+                        if(days=="a"){
+                            days=1;
+                        }
+                        $scope.loadData(days);
+                        $('#dashboard-range .text-date').text(start.format('MMM D, YYYY') + ' - ' + end.format('MMM D, YYYY'));
+                    }
+            );
+
+        }
+    </script>
+</head>
+
+<body ng-controller="Controller">
+<!-- content wrapper to define fullpage or container -->
+<!-- (recomended: dont change the id value) -->
+<section id="wrapper" class="container">
+<!-- define side left theme -->
+<aside class="side-left">
+    <!-- side header -->
+    <div class="side-header">
+        <!-- place your brand (recomended: dont change the id value) -->
+        <!-- (recomended: dont change the id value) -->
+        <h1 id="brand" class="brand">
+            <a href="/">
+                <!-- <i class="icon ion-waterdrop"></i> -->
+                Wizard ({{env}})
+            </a>
+        </h1><!-- /brand -->
+
+        <!-- form search, remove class hide if you not place your brand -->
+        <!-- (recomended: dont change the id value) -->
+        <form id="smart-search" class="side-form hide" role="form">
+            <input type="text" class="form-control" data-target=".side-wrapper" placeholder="Smart Finder">
+        </form><!-- /side wrapper -->
+    </div><!-- /side header -->
+
+    <!-- side body -->
+    <div class="side-body">
+        <!-- this you can place your search result with ajax -->
+
+        <!-- separate nav for ease development -->
+        <nav class="side-nav">
+            <!-- open nav ul -->
+
+            <ul id="widgets" class="side-nav-child open">
+                <li class="side-nav-item">
+                    <a n>
+                        <i class="nav-item-icon icon ion-document"></i>
+                        {{widgetName}}
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </div><!-- /side body -->
+</aside><!-- /side left -->
+
+<!-- define content theme, use data-swipe="true" to enable gesture event -->
+<!-- (recomended: dont change the id value) -->
+<section id="content" class="content">
+<!-- define your content header here -->
+<header class="content-header">
+    <!-- header actions -->
+    <div class="header-actions pull-right">
+
+        <!-- (recomended: dont change the id value) -->
+        <div class="btn-group">
+            <a id="users-setting" class="btn btn-icon data-toggle" data-toggle="dropdown" role="button">
+                <i class="icon ion-gear-b"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-extend pull-right" role="menu">
+                <li class="dropdown-profile">
+                    <div class="dp-cover">
+                        <img class="img-bg" src="/admin/assets/app/img/cover-blur.jpg" alt="">
+                        <a class="img-avatar" href="page_profile.html">
+                            <img class="img-circle" src="/admin/assets/app/img/avatar3.png" alt="">
+                        </a>
+                        <div class="dp-details">{{user.name}}</div>
+                    </div>
+                </li>
+                <li class="dropdown-footer">
+                    <div class="clearfix">
+                        <a href="javascript:;" class="btn btn-sm btn-default pull-right" ng-click="logout()">Sign out</a>
+                    </div>
+                </li><!-- /dropdown-footer -->
+            </ul><!-- /dropdown-extend -->
+        </div><!-- /btn-group setting -->
+
+
+        <!-- (recomended: dont change the id value) -->
+    </div><!-- /header actions -->
+
+    <!-- header actions -->
+
+    <!-- your Awesome App title -->
+    <h1 class="content-title">Statistics</h1>
+</header><!-- /side left -->
+
+
+<!-- define content row -->
+<div class="content-spliter">
+<!-- define your awesome apps here -->
+<!-- (recomended: dont change the id value) -->
+<section id="content-main" class="content-main">
+
+    <!-- your app content -->
+    <div class="content-app fixed-header">
+        <!-- app header -->
+        <div class="app-header">
+
+            <div class="pull-left">
+                <button class="btn btn-flat btn-default" id="dashboard-range">
+                    <span class="icon ion-ios7-calendar-outline"></span>
+                    <span class="text-date">Feb 11, 2014 - Feb 11, 2014</span>
+                    <b class="caret"></b>
+                </button>
+            </div>
+            <!-- <h3 class="app-title">Drop App Modules</h3> -->
+        </div><!-- /app header -->
+
+        <!-- app body -->
+        <div class="app-body">
+
+            <!-- app content here -->
+            <div class="magic-layout">
+                <div class="panel panel-default magic-element width-full">
+                    <div class="panel-body-heading bg-success">
+                        <h3 class="pb-title">Avg Execution Time</h3>
+
+                    </div>
+                    <div id="avgTime" class="chart"></div>
+                </div><!-- /panel -->
+
+                <div class="panel panel-default magic-element width-full">
+                    <div class="panel-body-heading bg-warning">
+                        <h3 class="pb-title">Execution Status</h3>
+                    </div>
+                    <div id="statusCount" class="chart"></div>
+                </div><!-- /panel -->
+            </div>
+            <!-- /magic-layout -->
+
+        </div><!-- /app body -->
+    </div><!-- /content app -->
+
+</section><!-- /content main -->
+
+
+
+<!-- define your extra apps here -->
+
+</div><!-- /content spliter -->
+
+</section><!-- /content -->
+</section><!-- /wrapper -->
+
+
+
+
+<!-- jQuery, theme required for theme -->
+<script src="/admin/assets/jquery/jquery.js"></script>
+<script src="/admin/assets/bootstrap/js/bootstrap.min.js"></script>
+
+<!-- theme dependencies -->
+<!-- 
+    Contents List
+    1. Raphaël
+    2. Isotope
+    3. verge
+    4. Moment
+    5. Prettify
+-->
+<script src="/admin/assets/app/js/dependencies.js"></script>
+
+<!-- other dependencies -->
+<script src="/admin/assets/morris/morris.min.js"></script>
+<script src="/admin/assets/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+<!-- theme app main.js -->
+<script src="/admin/assets/app/js/main.js"></script>
+<script type="text/javascript">
+
+
+
+</script>
+</body>
+</html>
