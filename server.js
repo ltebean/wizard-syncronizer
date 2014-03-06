@@ -33,6 +33,10 @@ app.configure(function() {
 
 });
 
+app.get('/',function (req,res){
+	res.sendfile(__dirname+'/public/index.html')
+})
+
 app.post('/admin/ci/sync', function(req, res) {
 	syncronizer.sync({
 		widgetName: req.body.widgetName,
