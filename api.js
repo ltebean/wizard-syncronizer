@@ -120,6 +120,18 @@ API.prototype.loadAllLayout = function(cb) {
 	});
 }
 
+API.prototype.proxy=function(req,res,cb){
+	if(req.method=='POST'){
+		this.proxyPost(req.cookies.u,req.originalUrl,req.body,function(err,result){
+			return cb(err,result);
+		})
+	}else if(req.method=='GET'){
+		this.proxyGet(req.cookies.u,req.originalUrl,function(err,result){
+			return cb(err,result);
+		})
+	}
+}
+
 API.prototype.proxyGet=function(userCookie,url,cb){
 	var domain = this.domain;
 	var cookie=request.cookie("u=" + userCookie);
