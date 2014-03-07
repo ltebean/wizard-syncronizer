@@ -193,9 +193,9 @@ function Controller($scope, $http, groupOp ,eventOp) {
             });
     }
 
-    $scope.prepareSyncWidget=function(widgetExtInfo){
+    $scope.prepareSyncWidget=function(widgetExtInfo,env){
         $scope.sync={
-            env:'alpha',
+            env:env,
             branch:'alpha',
             clearCache:true,
             appNames:"all"
@@ -613,9 +613,24 @@ function Controller($scope, $http, groupOp ,eventOp) {
                                     <a ng-click="prepareUpdateWidget(widget)" role="button" data-toggle="modal" data-target="#updateWidgetDialog" class="btn btn-default btn-sm btn-extend be-left">
                                         config<i class="icon ion-gear-b"></i>
                                     </a>
-                                    <a ng-click="prepareSyncWidget(widget)" role="button" data-toggle="modal" data-target="#syncWidgetDialog" class="btn btn-default btn-sm btn-extend be-left">
-                                        sync<i class="icon ion-upload"></i>
-                                    </a>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-extend be-left btn-sm dropdown-toggle" data-toggle="dropdown">sync<i class="icon ion-upload"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>
+                                                <a role="button" data-toggle="modal" data-target="#syncWidgetDialog" ng-click="prepareSyncWidget(widget,'alpha')">alpha</a>
+                                            </li>
+                                            <li>
+                                                <a role="button" data-toggle="modal" data-target="#syncWidgetDialog" ng-click="prepareSyncWidget(widget,'beta')">beta</a>
+                                            </li>
+                                            <li>
+                                                <a role="button" data-toggle="modal" data-target="#syncWidgetDialog" ng-click="prepareSyncWidget(widget,'pre')">pre</a>
+                                            </li>
+                                            <li>
+                                                <a role="button" data-toggle="modal" data-target="#syncWidgetDialog" ng-click="prepareSyncWidget(widget,'product')">product</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-default btn-extend be-left btn-sm dropdown-toggle" data-toggle="dropdown">code<i class="icon ion-wrench"></i>
                                         </button>
@@ -882,12 +897,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
                         <div class="form-group">
                             <label class="col-sm-3 control-label">Sync to Env:</label>
                             <div class="col-sm-8">
-                                <select name="env" ng-model="sync.env" class="form-control">
-                                    <option selected="selected">alpha</option>
-                                    <option>beta</option>
-                                    <option>pre</option>
-                                    <option>product</option>
-                                </select>
+                                <input name="env" type="text" ng-model="sync.env" class="form-control" disabled>
                             </div>
                         </div>
                         <div  ng-show="sync.env=='alpha'" class="form-group">

@@ -132,7 +132,7 @@ app.post('/admin/api/sync/layout/:layoutName/extInfo', function(req, res) {
 app.post('/admin/api/sync/layout/:layoutName/delete', function(req, res) {
 	async.eachSeries(envs, function(env,cb) {
 		api[env].deleteLayout(req.params.layoutName, function(err) {
-			cb(null);
+			cb(err);
 		})
 	}, function done(err) {
 		if(err){
