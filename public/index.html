@@ -168,7 +168,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
     }
 
     $scope.createWidget = function (widgetToAdd) {
-        $http.post("/admin/api/sync/widget/extinfo",widgetToAdd)
+        $http.post("/admin/api/sync/widget/extInfo",widgetToAdd)
                         .success(function(data) {
                             showSuccess(data)
                             $scope.currentGroup = $scope.groups[widgetToAdd.group.name];
@@ -184,7 +184,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
     }
 
     $scope.updateWidget=function(widgetToUpdate){
-        $http.post("/admin/api/sync/widget/"+widgetToUpdate.name+"/extinfo",widgetToUpdate)
+        $http.post("/admin/api/sync/widget/"+widgetToUpdate.name+"/extInfo",widgetToUpdate)
             .success(function(data) {
                 showSuccess(data)
                         

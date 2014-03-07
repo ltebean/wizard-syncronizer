@@ -51,27 +51,6 @@ API.prototype.commitWidget = function(options, cb) {
 	});
 }
 
-API.prototype.commitLayout = function(options, cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)	
-	request({
-		url: "http://" + domain + "/admin/api/layout/commit",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-		body: JSON.stringify(options)
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null)
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
 
 
 API.prototype.loadWidgetExtInfo = function(widgetName,cb) {
@@ -96,139 +75,6 @@ API.prototype.loadWidgetExtInfo = function(widgetName,cb) {
 	});
 }
 
-API.prototype.createWidget = function(widgetExtInfo,cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)
-	
-	request({
-		url: "http://" + domain + "/admin/api/widget/extInfo",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-		body: JSON.stringify(widgetExtInfo)
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
-
-API.prototype.updateWidgetExtInfo = function(widgetExtInfo,cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)
-	
-	request({
-		url: "http://" + domain + "/admin/api/widget/"+widgetExtInfo.name+"/extInfo",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-		body: JSON.stringify(widgetExtInfo)
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
-
-API.prototype.deleteWidget = function(widgetName,cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)	
-	request({
-		url: "http://" + domain + "/admin/api/widget/"+widgetName+"/delete",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
-
-API.prototype.createLayout = function(layoutExtInfo,cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)
-	
-	request({
-		url: "http://" + domain + "/admin/api/layout/extInfo",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-		body: JSON.stringify(layoutExtInfo)
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
-
-API.prototype.updateLayoutExtInfo = function(layoutExtInfo,cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)
-	
-	request({
-		url: "http://" + domain + "/admin/api/layout/"+layoutExtInfo.name+"/extInfo",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-		body: JSON.stringify(layoutExtInfo)
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
-
-API.prototype.deleteLayout = function(layoutName,cb) {
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + getUser().id);
-	var jar = request.jar()
-	jar.add(cookie)	
-	request({
-		url: "http://" + domain + "/admin/api/layout/"+layoutName+"/delete",
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,null);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-}
 
 API.prototype.loadAllWidget = function(cb) {
 	var domain = this.domain;
@@ -319,7 +165,6 @@ API.prototype.proxyPost=function(userCookie,url,body,cb){
 			return cb(new Error(response.statusCode),null);
 		}
 	});
-
 }
 
 
