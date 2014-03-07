@@ -85,6 +85,9 @@ exports.sync = function(options, callback) {
 		}else{
 			info += logAndReturn("upload " + widgetName + " success");
 		}
+		// require('../package.js').pack(tempDirectory,function(err){
+		// 	console.log(err)
+		// })
 		return callback && callback(info);
 	})
 
