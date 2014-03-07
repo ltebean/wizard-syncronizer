@@ -245,7 +245,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
 
     $scope.currentHistoryPage=0;
     $scope.refreshHistory = function() {
-        $http.get("/admin/api/widget/histories?page=0")
+        $http.get("/admin/api/widget/histories?page=0",{headers: {'X-ENV': 'product'}})
                 .success(function(data) {
                     $scope.histories = data;
                     $scope.currentHistoryPage=0;
@@ -256,7 +256,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
 
     $scope.loadMoreHistory = function() {
         $scope.currentHistoryPage++;
-        $http.get("/admin/api/widget/histories?page="+$scope.currentHistoryPage)
+        $http.get("/admin/api/widget/histories?page="+$scope.currentHistoryPage,{headers: {'X-ENV': 'product'}})
                 .success(function(data) {
                     $scope.histories = data;
                 }).error(function(data) {
@@ -300,7 +300,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
     }
 
     $scope.loadStatData=function(groupName){
-        $http.get("/admin/api/statistics/widgetExecutionEvent/group/"+groupName+"/last/1/days")
+        $http.get("/admin/api/statistics/widgetExecutionEvent/group/"+groupName+"/last/1/days",{headers: {'X-ENV': 'product'}})
                 .success(function(data) {
                     $scope.statData=data;
                 }).error(function(data) {
