@@ -120,56 +120,20 @@ API.prototype.loadAllLayout = function(cb) {
 	});
 }
 
-API.prototype.proxy=function(req,res,cb){
-	if(req.method=='POST'){
-		this.proxyPost(req.cookies.u,req.originalUrl,req.body,function(err,result){
-			return cb(err,result);
-		})
-	}else if(req.method=='GET'){
-		this.proxyGet(req.cookies.u,req.originalUrl,function(err,result){
-			return cb(err,result);
-		})
-	}
-}
-
-API.prototype.proxyGet=function(userCookie,url,cb){
+API.prototype.proxy=function(req,cb){
 	var domain = this.domain;
-	var cookie=request.cookie("u=" + userCookie);
+	var cookie=request.cookie("u=" + req.cookies.u);
 	var jar = request.jar()
 	jar.add(cookie)
 	
 	request({
-		url: "http://" + domain + url,
+		url: "http://" + domain + req.originalUrl,
 		headers: {
 			"Content-type": "application/json"
 		},
 		jar:jar,
-		method: "GET"
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			return cb(null,JSON.parse(body)||200);
-		} else {
-			return cb(new Error(response.statusCode),null);
-		}
-	});
-
-}
-
-API.prototype.proxyPost=function(userCookie,url,body,cb){
-
-	var domain = this.domain;
-	var cookie=request.cookie("u=" + userCookie);
-	var jar = request.jar()
-	jar.add(cookie)
-	
-	request({
-		url: "http://" + domain + url,
-		headers: {
-			"Content-type": "application/json"
-		},
-		jar:jar,
-		method: "POST",
-		body: JSON.stringify(body)
+		method: req.method,
+		body: JSON.stringify(req.body)
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			return cb(null,body);

@@ -24,8 +24,8 @@ app.configure(function() {
 		var envs = ['alpha', 'beta', 'pre', 'product'];
 		req.originalUrl=req.originalUrl.replace("/admin/api/sync",'/admin/api');	
 		async.eachSeries(envs, function(env,cb) {
-			api[env].proxy(req,res,function(err,result){
-				console.log(env+":"+err)
+			api[env].proxy(req,function(err,result){
+				//console.log(env+":"+err)
 				cb(err);
 			})
 		}, function done(err) {
@@ -39,7 +39,7 @@ app.configure(function() {
 	app.use(function handleProxy(req, res, next) {
 		var env=req.headers['x-env']||'alpha'
 		//console.log(env)
-		api[env].proxy(req,res,function(err,result){
+		api[env].proxy(req,function(err,result){
 			return res.send(result);
 		})		
 	});
