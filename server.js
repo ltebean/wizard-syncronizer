@@ -17,15 +17,12 @@ app.configure(function() {
 	app.use('/admin', express.static(__dirname + '/public'));
 	app.use(app.router);
 	app.use(function handleSync(req, res, next) {
-		if(req.originalUrl.indexOf('/admin/api/sync')==-1){
+		if(req.headers['x-sync']!='true'){
 			return next();
-		}
-		console.dir(req.path);
-		var envs = ['alpha', 'beta', 'pre', 'product'];
-		req.originalUrl=req.originalUrl.replace("/admin/api/sync",'/admin/api');	
-		async.eachSeries(envs, function(env,cb) {
+		}	
+		async.eachSeries(['alpha', 'beta', 'pre', 'product'], function(env,cb) {
 			api[env].proxy(req,function(err,result){
-				//console.log(env+":"+err)
+				console.log(env+err)
 				cb(err);
 			})
 		}, function done(err) {
@@ -37,7 +34,7 @@ app.configure(function() {
 		})						
 	});
 	app.use(function handleProxy(req, res, next) {
-		var env=req.headers['x-env']||'alpha'
+		var env=req.headers['x-env']||'alpha';
 		//console.log(env)
 		api[env].proxy(req,function(err,result){
 			return res.send(result);

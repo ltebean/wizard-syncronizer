@@ -168,7 +168,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
     }
 
     $scope.createWidget = function (widgetToAdd) {
-        $http.post("/admin/api/sync/widget/extInfo",widgetToAdd)
+        $http.post("/admin/api/widget/extInfo",widgetToAdd,{headers: {'X-SYNC': 'true'}})
                         .success(function(data) {
                             showSuccess(data)
                             $scope.currentGroup = $scope.groups[widgetToAdd.group.name];
@@ -184,7 +184,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
     }
 
     $scope.updateWidget=function(widgetToUpdate){
-        $http.post("/admin/api/sync/widget/"+widgetToUpdate.name+"/extInfo",widgetToUpdate)
+        $http.post("/admin/api/widget/"+widgetToUpdate.name+"/extInfo",widgetToUpdate,{headers: {'X-SYNC': 'true'}})
             .success(function(data) {
                 showSuccess(data)
                         
@@ -221,7 +221,7 @@ function Controller($scope, $http, groupOp ,eventOp) {
     }
 
     $scope.deleteWidget = function (widget) {
-        $http.post("/admin/api/sync/widget/"+widget.name+"/delete")
+        $http.post("/admin/api/widget/"+widget.name+"/delete",null,{headers: {'X-SYNC': 'true'}})
             .success(function(data) {
                 showSuccess(data)                 
             }).error(function(data) {

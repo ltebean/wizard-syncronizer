@@ -149,7 +149,7 @@
             }
             $scope.createLayout=function(layout){
                 layout.author="DP";
-                $http.post("/admin/api/sync/layout/extInfo", layout)
+                $http.post("/admin/api/layout/extInfo", layout,{headers: {'X-SYNC': 'true'}})
                         .success(function (data) {
                             refresh();
                             showSuccess(layout.name+ ' created');
@@ -163,7 +163,7 @@
             }
 
             $scope.updateLayout=function(layout){
-                $http.post("/admin/api/sync/layout/"+layout.name+"/extInfo",layout)
+                $http.post("/admin/api/layout/"+layout.name+"/extInfo",layout,{headers: {'X-SYNC': 'true'}})
                         .success(function (data) {
                             showSuccess(layout.name+ ' updated');
                             refresh();
@@ -173,7 +173,7 @@
             }
 
             $scope.deleteLayout = function (layout) {
-                $http.post("/admin/api/sync/layout/"+layout.name+"/delete")
+                $http.post("/admin/api/layout/"+layout.name+"/delete",null,{headers: {'X-SYNC': 'true'}})
                         .success(function (data) {
                             showSuccess(layout.name+ ' deleted');
                             refresh();
