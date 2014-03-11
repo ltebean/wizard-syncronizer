@@ -22,7 +22,7 @@ app.configure(function() {
 		}	
 		async.eachSeries(['alpha', 'beta', 'pre', 'product'], function(env,cb) {
 			api[env].proxy(req,function(err,result){
-				console.log(env+err)
+				//console.log(env+err)
 				cb(err);
 			})
 		}, function done(err) {
