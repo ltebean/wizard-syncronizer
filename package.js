@@ -7,9 +7,17 @@ var Client = require('ftp');
 var moment = require('moment');
 var request = require('request');
 
-exports.pack = function(projectDir, callback) {
-	var user = config.loadConfig().user;
-	var basePackage = projectDir + "/src/main/resources/widget";
+var appConfig={
+	"git@code.dianpingoa.com:apple/shop-web.git":{
+		name:"shop-web",
+		warName:"shop-web-product-2.1.9.war",
+		token:"i4_gpfPbFT3a6gzR2qYIcg"
+	}
+}
+
+exports.pack = function(options, callback) {
+	var app = appConfig[options.gitURL];
+	var projectDir = options.projectDir;
 
 	async.waterfall([
 		function loadAllWidget(cb) {
@@ -19,8 +27,9 @@ exports.pack = function(projectDir, callback) {
 			});
 		},
 		function writeWidgetToLocal(allWidget, cb) {
+			var basePackage = projectDir + "/src/main/resources/widget";
 			console.log(allWidget.length + " widget loaded");
-			deleteFolderRecursive(projectDir + "/src/main/resources/widget");
+			deleteFolderRecursive(basePackage);
 			for (var i = allWidget.length - 1; i >= 0; i--) {
 				var widget = allWidget[i];
 				console.log("writing: " + widget.name + "...");
@@ -44,19 +53,20 @@ exports.pack = function(projectDir, callback) {
 			var client = new Client();
 			client.on('ready', function() {
 				console.log("connected");
-				var localPath = projectDir + "/target/shop-web-product-2.1.9.war";
-				var tag = "wizard-" + moment().format('YYYY-MM-DD_hh-mm-ss');
-				var remotePath = "/product-shop-web/" + moment().format('YYYY-MM-DD_hh-mm-ss');
+				var localPath = projectDir + "/target/"+app.warName;
+				var remotePath = "/product-"+app.name;
+
 				console.log("transfer:" + localPath + " to:" + remotePath);
 				client.mkdir(remotePath, true, function(err) {
 					if (err) return cb(err);
 					console.log("begin putting file...")
-					client.put(localPath, remotePath+"/shop-web-product-2.1.9.war", function(err) {
+					client.put(localPath, remotePath+"/"+app.warName, function(err) {
 						if (err) throw err;
 						client.end();
 						console.log("transfer success");
 						console.log("connection ended");
-						cb(null,tag,remotePath+"/shop-web-product-2.1.9.war");
+						var tag = "wizard-" + moment().format('YYYY-MM-DD_hh-mm-ss');
+						cb(null,tag,remotePath+"/"+app.warName);
 					});
 				});
 
@@ -69,17 +79,17 @@ exports.pack = function(projectDir, callback) {
 		},
 		function registerToButton(tag, remotePath, cb) {
 			console.log("register to button...")
+			var warUrls={};
+			warUrls[app.name]=remotePath;
 			request({
 					url: "http://code.dianpingoa.com/api/v3/op/packing/edit",
 					method: "get",
 					qs: {
-						"private_token": "i4_gpfPbFT3a6gzR2qYIcg",
-						"module_names": "shop-web",
+						"private_token": app.token,
+						"module_names": app.name,
 						"branch_name": "master",
 						"tag": tag,
-						"war_urls": JSON.stringify({
-							"shop-web": remotePath
-						})
+						"war_urls": JSON.stringify(warUrls)
 					},
 					headers: {
 						"Content-type": "application/json"
