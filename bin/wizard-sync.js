@@ -87,12 +87,12 @@ exports.sync = function(options, callback) {
 			info += logAndReturn("upload " + widgetName + " success");
 			if(env=='product'){
 			//async task
-				require('../package.js').pack({
-					gitURL:widgetExtInfo.gitURL,
-					projectDir:tempDirectory
-				},function(err){
-					console.log(err);				
-				})
+				// require('../package.js').pack({
+				// 	gitURL:widgetExtInfo.gitURL,
+				// 	projectDir:tempDirectory
+				// },function(err){
+				// 	console.log(err);				
+				// })
 			}	
 		}
 		return callback && callback(info);
