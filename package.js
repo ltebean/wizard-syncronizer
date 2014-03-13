@@ -6,12 +6,23 @@ var yaml = require('js-yaml');
 var Client = require('ftp');
 var moment = require('moment');
 var request = require('request');
+var yaml = require('js-yaml');
 
 var appConfig={
 	"git@code.dianpingoa.com:apple/shop-web.git":{
 		name:"shop-web",
-		warName:"shop-web-product-2.1.9.war",
+		warName:"shop-web-qa-2.1.9.war",
 		token:"i4_gpfPbFT3a6gzR2qYIcg"
+	},
+	"git@code.dianpingoa.com:info/dpindex-web.git":{
+		name:"dpindex-web",
+		warName:"dpindex-web-product-1.0.0.war",
+		token:"NuiwJ93028TkYoYq2_5s5A"
+	},
+	"git@code.dianpingoa.com:shoppic/shoppic-web.git":{
+		name:"shppic-web",
+		warName:"shoppic-web-product-4.2.0.war",
+		token:"ZQX33FnHpwk1Sw4l87fVgg"
 	}
 }
 
@@ -20,22 +31,18 @@ exports.pack = function(options, callback) {
 	var projectDir = options.projectDir;
 
 	async.waterfall([
-		function loadAllWidget(cb) {
-			console.log("loading all widgets");
-			api['product'].loadAllWidget(function(err, allWidget) {
-				cb(err, allWidget);
-			});
-		},
-		function writeWidgetToLocal(allWidget, cb) {
-			var basePackage = projectDir + "/src/main/resources/widget";
-			console.log(allWidget.length + " widget loaded");
-			deleteFolderRecursive(basePackage);
-			for (var i = allWidget.length - 1; i >= 0; i--) {
-				var widget = allWidget[i];
-				console.log("writing: " + widget.name + "...");
-				writeWidget(basePackage, widget);
-			};
-			cb(null);
+		function writeWidgetToLocal(cb) {
+			var configFilePath = projectDir + "/src/main/resources/wizard.yaml";
+			try{
+				var wizardConfig=yaml.load(fs.readFileSync(configFilePath).toString())
+				wizardConfig.mode='local';
+				wizardConfig.modeChecker='off';
+				fs.unlinkSync(configFilePath);
+				fs.writeFileSync(configFilePath, yaml.dump(wizardConfig,{ident:4}));
+				cb(null);
+			} catch(err){
+				cb(err);
+			}
 		},
 		function packageWar(cb) {
 			console.log("start mvn package...");
@@ -54,7 +61,7 @@ exports.pack = function(options, callback) {
 			client.on('ready', function() {
 				console.log("connected");
 				var localPath = projectDir + "/target/"+app.warName;
-				var remotePath = "/product-"+app.name;
+				var remotePath = "/product-"+app.name+"/wizard-"+moment().format('YYYY-MM-DD_hh-mm-ss');
 
 				console.log("transfer:" + localPath + " to:" + remotePath);
 				client.mkdir(remotePath, true, function(err) {

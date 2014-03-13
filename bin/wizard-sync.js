@@ -4,7 +4,6 @@ var Repo = require("../repo.js");
 var api = require("../api.js");
 var config = require("../config.js");
 var fs = require("fs");
-var package = require("../package.js");
 var async=require('async');
 
 var conf = config.loadConfig();
@@ -46,10 +45,12 @@ exports.sync = function(options, callback) {
 	var tempDirectory = createTempDirectory();
 	console.log("create temp directory: " + tempDirectory);
 
+	var widgetExtInfo;
 	async.waterfall([
 		function loadWidgetExtInfo(cb) {
-			api[env].loadWidgetExtInfo(widgetName, function(err, widgetExtInfo) {
-				return cb(err, widgetExtInfo);
+			api[env].loadWidgetExtInfo(widgetName, function(err, extInfo) {
+				widgetExtInfo=extInfo;
+				return cb(err, extInfo);
 			});
 		},
 		function cloneGitRepo(widgetExtInfo,cb) {
@@ -84,10 +85,16 @@ exports.sync = function(options, callback) {
 			info += logAndReturn("sync error:" + err.message);
 		}else{
 			info += logAndReturn("upload " + widgetName + " success");
+			if(env=='product'){
+			//async task
+				require('../package.js').pack({
+					gitURL:widgetExtInfo.gitURL,
+					projectDir:tempDirectory
+				},function(err){
+					console.log(err);				
+				})
+			}	
 		}
-		// require('../package.js').pack(tempDirectory,function(err){
-		// 	console.log(err)
-		// })
 		return callback && callback(info);
 	})
 
