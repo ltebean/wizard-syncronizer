@@ -11,7 +11,7 @@ var yaml = require('js-yaml');
 var appConfig={
 	"git@code.dianpingoa.com:apple/shop-web.git":{
 		name:"shop-web",
-		warName:"shop-web-qa-2.1.9.war",
+		warName:"shop-web-product-2.1.9.war",
 		token:"i4_gpfPbFT3a6gzR2qYIcg"
 	},
 	"git@code.dianpingoa.com:info/dpindex-web.git":{
