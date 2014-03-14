@@ -85,7 +85,7 @@ exports.sync = function(options, callback) {
 			info += logAndReturn("sync error:" + err.message);
 		}else{
 			info += logAndReturn("upload " + widgetName + " success");
-			if(env=='product'){
+			if(env=='pre'){
 			//async task
 				require('../package.js').pack({
 					gitURL:widgetExtInfo.gitURL,

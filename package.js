@@ -50,16 +50,15 @@ exports.pack = function(options, callback) {
 			var cp = require('child_process');
 			var command = '/usr/local/maven/bin/mvn -s /usr/local/maven/conf/settings.xml package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
 			console.log(command);
-			cp.exec(command,function(err, stdout, stderr) {
-				if(err){
+			cp.exec(command,{},function(err, stdout, stderr) {
+				console.log(stdout);
+				console.log(stderr);
+				if(err){					
 					return cb(err);
 				}
-				if(stderr){
-					console.log(stderr);
+				if(stderr){					
 					return cb(new Error("mvn package error"))
-
 				}
-				console.log(stdout);
 				return cb(null);
 			});
 		},
