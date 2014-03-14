@@ -40,9 +40,9 @@ exports.pack = function(options, callback) {
 				wizardConfig.modeChecker='off';
 				fs.unlinkSync(configFilePath);
 				fs.writeFileSync(configFilePath, yaml.dump(wizardConfig,{ident:4}));
-				cb(null);
+				return cb(null);
 			} catch(err){
-				cb(err);
+				return cb(err);
 			}
 		},
 		function packageWar(cb) {
@@ -51,9 +51,13 @@ exports.pack = function(options, callback) {
 			var command = '/usr/local/maven/bin/mvn -s /usr/local/maven/conf/settings.xml package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
 			console.log(command);
 			cp.exec(command, {}, function(err, stdout, stderr) {
+				if(err||stderr){
+					console.log(stderr);
+					return cb(new Error("mvn package error"))
+
+				}
 				console.log(stdout);
-				console.log(stderr);
-				cb(null);
+				return cb(null);
 			});
 		},
 		function publishToFTP(cb) {
@@ -74,7 +78,7 @@ exports.pack = function(options, callback) {
 						console.log("transfer success");
 						console.log("connection ended");
 						var buttonTag = tag+"-" + moment().format('MM-DD_hh-mm-ss');
-						cb(null,buttonTag,remotePath+"/"+app.warName);
+						return cb(null,buttonTag,remotePath+"/"+app.warName);
 					});
 				});
 
@@ -106,9 +110,9 @@ exports.pack = function(options, callback) {
 				}, function(error, response, body) {
 					if (!error && response.statusCode == 200) {
 						console.log("register to button success")
-						cb(null)
+						return cb(null)
 					} else {
-						cb(error);
+						return cb(error);
 					}
 				}
 
