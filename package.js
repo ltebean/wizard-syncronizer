@@ -51,7 +51,10 @@ exports.pack = function(options, callback) {
 			var command = '/usr/local/maven/bin/mvn -s /usr/local/maven/conf/settings.xml package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
 			console.log(command);
 			cp.exec(command,function(err, stdout, stderr) {
-				if(err||stderr){
+				if(err){
+					return cb(err);
+				}
+				if(stderr){
 					console.log(stderr);
 					return cb(new Error("mvn package error"))
 
