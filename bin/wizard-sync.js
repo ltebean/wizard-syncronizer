@@ -41,8 +41,8 @@ exports.sync = function(options, callback) {
 		console.log("you must specify a branch");
 		return;
 	}
-	deleteTempDirectory();
-	var tempDirectory = createTempDirectory();
+	deleteTempDirectory(widgetName);
+	var tempDirectory = createTempDirectory(widgetName);
 	console.log("create temp directory: " + tempDirectory);
 
 	var widgetExtInfo;
@@ -106,14 +106,14 @@ function logAndReturn(msg) {
 	return msg + "\n";
 }
 
-function createTempDirectory() {
-	var path = config.getWizardHome() + "/temp";
+function createTempDirectory(widgetName) {
+	var path = config.getWizardHome() + "/temp/"+widgetName;
 	fs.mkdirSync(path);
 	return path;
 }
 
-function deleteTempDirectory() {
-	var path = config.getWizardHome() + "/temp";
+function deleteTempDirectory(widgetName) {
+	var path = config.getWizardHome() + "/temp/"+widgetName;
 	deleteFolderRecursive(path);
 }
 
