@@ -48,7 +48,7 @@ exports.pack = function(options, callback) {
 		function packageWar(cb) {
 			console.log("start mvn package...");
 			var cp = require('child_process');
-			var command = '/usr/local/maven/bin/mvn package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
+			var command = '/usr/local/maven/bin/mvn -s /usr/local/maven/conf/settings.xml package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
 			console.log(command);
 			cp.exec(command, {}, function(err, stdout, stderr) {
 				console.log(stdout);
