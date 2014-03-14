@@ -29,6 +29,7 @@ var appConfig={
 exports.pack = function(options, callback) {
 	var app = appConfig[options.gitURL];
 	var projectDir = options.projectDir;
+	var tag=options.tag||'wizard';
 
 	async.waterfall([
 		function writeWidgetToLocal(cb) {
@@ -47,7 +48,7 @@ exports.pack = function(options, callback) {
 		function packageWar(cb) {
 			console.log("start mvn package...");
 			var cp = require('child_process');
-			var command = 'mvn package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
+			var command = '/usr/local/maven/bin/mvn package -Denv=product -DskipTests -f ' + projectDir + "/pom.xml";
 			console.log(command);
 			cp.exec(command, {}, function(err, stdout, stderr) {
 				console.log(stdout);
@@ -72,8 +73,8 @@ exports.pack = function(options, callback) {
 						client.end();
 						console.log("transfer success");
 						console.log("connection ended");
-						var tag = "wizard-" + moment().format('YYYY-MM-DD_hh-mm-ss');
-						cb(null,tag,remotePath+"/"+app.warName);
+						var buttonTag = tag+"-" + moment().format('MM-DD_hh-mm-ss');
+						cb(null,buttonTag,remotePath+"/"+app.warName);
 					});
 				});
 

@@ -89,7 +89,8 @@ exports.sync = function(options, callback) {
 			//async task
 				require('../package.js').pack({
 					gitURL:widgetExtInfo.gitURL,
-					projectDir:tempDirectory
+					projectDir:tempDirectory,
+					tag:widgetName
 				},function(err){
 					console.log(err);				
 				})
