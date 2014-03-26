@@ -74,7 +74,7 @@ exports.sync = function(options, callback) {
 			api[env].commitWidget({
 						widget: widget,
 						comment: comment,
-						clearCache: options.clearCache || true,
+						clearCache: options.clearCache,
 						appNames: options.appNames || "all",
 					}, function(err) {
 						return cb(err);
